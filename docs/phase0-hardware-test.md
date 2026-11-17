@@ -157,7 +157,7 @@ hiçbir şey göndermez, hiçbir şeyi kaydetmez.
 **Yaz:**
 
 ```bash
-timeout 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
+timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 ```
 
 **Yap:** Bir elin farenin üstünde dursun; Enter'a öbür elinle bas. Enter'a basar basmaz fareyi 5 saniye boyunca
@@ -202,7 +202,7 @@ bir satır. İmleç biraz daha az akıcı gelebilir; fark etmeyebilirsin de.
 **Yaz** (Enter'dan hemen sonra yine 5 saniye hızlı daireler):
 
 ```bash
-timeout 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
+timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 ```
 
 **Beklenen:** Başlangıç sayından belirgin şekilde düşük bir sayı.
@@ -228,7 +228,7 @@ Yalnızca başlangıç sayın 1900 ile 2600 arasındaysa, onun yerine bunu yaz:
 Sonra ölç (yine 5 saniye hızlı daireler):
 
 ```bash
-timeout 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
+timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 ```
 
 **Beklenen:** Başlangıç sayına yakın bir sayı.
@@ -410,7 +410,7 @@ Fare şimdi kırmızı, imleç yavaş olmalı.
 **Yap:** Fareyi çıkar, 5 saniye bekle, geri tak. Sonra ölç (yine 5 saniye hızlı daireler):
 
 ```bash
-timeout 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
+timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 ```
 
 **Beklenen:** Farenin kendi ayarlarına dönmesi: ışığın kırmızı değil, farenin takılınca gösterdiği kendi ışığı
@@ -448,7 +448,7 @@ tuşa ya da güç düğmesine kısaca basarak bilgisayarı uyandır ve oturumunu
 daireler):
 
 ```bash
-timeout 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
+timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 ```
 
 **Beklenen:** Burada sonucu bilmiyoruz: ayarlar kalabilir ya da fare kendi ayarlarına dönebilir. İkisi de mümkün;
@@ -481,7 +481,7 @@ oturumu ve terminal kapanabilir.
 `Ctrl+Alt+T` ile bir terminal aç ve ölç (yine 5 saniye hızlı daireler):
 
 ```bash
-timeout 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
+timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 ```
 
 **Beklenen:** Burada sonucu bilmiyoruz: ayarlar kalabilir ya da fare kendi ayarlarına dönebilir. İkisi de mümkün;
