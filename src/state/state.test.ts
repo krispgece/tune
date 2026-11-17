@@ -209,10 +209,21 @@ describe('devices', () => {
   });
 
   it('show the apply status', () => {
-    expect(applyStatus(false, true, 'ok')).toBe('own');
-    expect(applyStatus(true, true, 'ok')).toBe('paused');
-    expect(applyStatus(true, false, 'sending')).toBe('sending');
-    expect(applyStatus(true, false, 'notSent')).toBe('notSent');
+    const managed = { ...defaultDeviceSettings(), managed: { dpi: true, rate: true, light: true } };
+    expect(applyStatus('rate', defaultDeviceSettings(), true, 'verified')).toBe('own');
+    expect(applyStatus('rate', managed, true, 'verified')).toBe('paused');
+    expect(applyStatus('rate', managed, false, 'sending')).toBe('sending');
+    expect(applyStatus('rate', managed, false, 'verified')).toBe('verified');
+    expect(applyStatus('light', managed, false, 'failed')).toBe('failed');
+    expect(applyStatus('light', managed, false, 'notSent')).toBe('notSent');
+  });
+
+  it('show DPI stages the mouse already has as stored on it until something is sent', () => {
+    const managed = { ...defaultDeviceSettings(), managed: { dpi: true, rate: true, light: true } };
+    expect(applyStatus('dpi', managed, false, 'idle')).toBe('stored');
+    expect(applyStatus('dpi', { ...managed, dpiPending: true }, false, 'idle')).toBe('waiting');
+    expect(applyStatus('dpi', managed, false, 'echoed')).toBe('echoed');
+    expect(applyStatus('rate', managed, false, 'idle')).toBe('waiting');
   });
 });
 

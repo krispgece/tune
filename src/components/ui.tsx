@@ -1,16 +1,21 @@
 import {
+  BadgeCheck,
   Check,
   ChevronDown,
+  CircleAlert,
   CircleCheck,
   CircleHelp,
   CirclePause,
   CircleSlash,
   FlaskConical,
   Headphones,
+  Hourglass,
   Info,
   Keyboard,
   LoaderCircle,
   Mouse,
+  Save,
+  Send,
   type LucideIcon,
 } from 'lucide-react';
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode, Ref } from 'react';
@@ -113,8 +118,13 @@ export function LanguagePicker({ labelledBy, style }: { labelledBy: string; styl
 }
 
 const STATUS: Record<ApplyStatus, { icon: LucideIcon; tone: string; key: StringKey }> = {
-  ok: { icon: CircleCheck, tone: 'ok', key: 'stOk' },
   sending: { icon: LoaderCircle, tone: '', key: 'stSending' },
+  verified: { icon: BadgeCheck, tone: 'ok', key: 'stVerified' },
+  echoed: { icon: CircleCheck, tone: 'ok', key: 'stEchoed' },
+  sent: { icon: Send, tone: '', key: 'stSent' },
+  stored: { icon: Save, tone: '', key: 'stStored' },
+  waiting: { icon: Hourglass, tone: '', key: 'stWaiting' },
+  failed: { icon: CircleAlert, tone: 'warn', key: 'stFailed' },
   own: { icon: Mouse, tone: '', key: 'stOwn' },
   paused: { icon: CirclePause, tone: 'warn', key: 'stPaused' },
   notSent: { icon: CircleSlash, tone: '', key: 'stNotSent' },

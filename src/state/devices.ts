@@ -110,10 +110,26 @@ export function comebacks(scan: ScanReport, reapplied: ReadonlyMap<string, strin
   return reachable(scan).filter((d) => reapplied.get(d.id) !== d.instance);
 }
 
-export type GroupStatus = 'sending' | 'ok' | 'notSent';
-export type ApplyStatus = GroupStatus | 'own' | 'paused';
+/**
+ * What happened to a setting group's last send in this session: nothing yet (`idle`), on its way, sent without an
+ * answer, answered (`echoed`), read back (`verified`), held back while paused or with sending off (`notSent`), or
+ * not delivered because the mouse couldn't be reached (`failed`).
+ */
+export type GroupStatus = 'idle' | 'sending' | 'sent' | 'echoed' | 'verified' | 'notSent' | 'failed';
+export type ApplyStatus = Exclude<GroupStatus, 'idle'> | 'own' | 'paused' | 'stored' | 'waiting';
 
-export function applyStatus(managed: boolean, paused: boolean, status: GroupStatus): ApplyStatus {
-  if (!managed) return 'own';
-  return paused ? 'paused' : status;
+/**
+ * The status a setting card shows. Before anything is sent in this session, DPI stages the mouse has taken show as
+ * stored on the mouse, which keeps them itself.
+ */
+export function applyStatus(
+  group: SettingGroup,
+  device: DeviceSettings,
+  paused: boolean,
+  status: GroupStatus,
+): ApplyStatus {
+  if (!device.managed[group]) return 'own';
+  if (paused) return 'paused';
+  if (status !== 'idle') return status;
+  return group === 'dpi' && !device.dpiPending ? 'stored' : 'waiting';
 }

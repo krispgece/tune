@@ -36,8 +36,8 @@ export function Lighting({ tune }: { tune: Tune }) {
         id="light"
         title={t('lightColour')}
         note={t('lightVerified')}
-        status={applyStatus(d.managed.light, tune.paused, tune.groupStatus.light)}
-        help={helpItems(tune.i18n, tune.sendsSettings)}
+        status={applyStatus('light', d, tune.paused, tune.groupStatus.light)}
+        help={helpItems(tune.i18n, 'light', tune.sendsSettings)}
       >
         <div className={`light-layout${lit ? '' : ' off'}`}>
           <div className="hero">
@@ -113,7 +113,6 @@ export function Lighting({ tune }: { tune: Tune }) {
                     />
                   </div>
                 ))}
-                <p className="cell caption">{t('zoneNote')}</p>
               </>
             )}
           </div>

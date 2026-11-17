@@ -48,15 +48,22 @@ export const tr: Strings = {
 
   // Apply status
   experimental: 'Deneysel',
-  notVerified: 'Bu fareyle henüz donanımda doğrulanmadı.',
-  stOk: 'Fare aldı',
+  testedOne: 'Şimdiye kadar tek bir farede denendi.',
+  stEchoed: 'Fare aldı',
   stSending: 'Gönderiliyor…',
+  stSent: 'Gönderildi',
+  stStored: 'Farede kayıtlı',
+  stWaiting: 'Henüz gönderilmedi',
+  stFailed: 'Gönderilemedi',
   stOwn: 'Farenin ayarı',
   stVerified: 'Doğrulandı',
   stNotSent: 'Gönderilmedi',
   hSending: '{app} ayarı fareye gönderiyor.',
-  hOk: 'fare yanıt verdi.',
-  hVerified: 'ayar fareden geri okundu (bu fare için henüz yok).',
+  hEchoed: 'fare ayarı aldığını bildirdi.',
+  hSent: 'ayar gönderildi ama fare yanıt vermedi.',
+  hVerified: 'fare rapor hızını geri bildirdi ve seçtiğinle aynı.',
+  hStored: 'fare DPI kademelerini kendisi saklar; {app} onları yalnızca sen değiştirdiğinde gönderir.',
+  hFailed: '{app} fareye ulaşamadı; fare yeniden takıldığında tekrar dener.',
   hOwn: '{app} bu ayarı yönetmiyor; farenin kendi değeri geçerli.',
   hPaused: 'koruma devrede, ayar gönderilmiyor.',
   hNotSent: 'bu sürümde gönderme, donanım testi doğrulayana kadar kapalı; seçimin bu bilgisayarda saklanır.',
@@ -77,15 +84,18 @@ export const tr: Strings = {
   makeStart: 'Başlangıç kademesi yap',
   delStage: 'Kademeyi sil',
   dpiNote: 'Farenin DPI tuşu bu kademeler arasında geçiş yapar.',
+  dpiStored:
+    'Fare bu kademeleri kendisi saklar, çıkarılınca da kaybetmez; yeniden takılınca en son kaldığı kademeden başlar. {app} onları yalnızca sen değiştirdiğinde gönderir, fare de o an başlangıç kademesine geçer.',
   dpiSuggest: '{app} farenin şu anki ayarlarını okuyamadığı için değerler öneri olarak başlar.',
 
   // Polling rate
   rateTitle: 'Rapor hızı',
-  rateNote: 'Yüksek değer imleci daha akıcı yapar. Bu farede üst sınır {max} Hz.',
+  rateNote:
+    'Yüksek değer imleci daha akıcı yapar. Bu farede üst sınır {max} Hz. Fare çıkarılınca kendi hızına döner; {app} seninkini her takılışta yeniden gönderir.',
 
   // Lighting
   lightColour: 'Işık rengi',
-  lightVerified: 'Tek renk bu farede denendi ve çalışıyor; bölge bölge renk henüz doğrulanmadı.',
+  lightVerified: 'Şimdiye kadar tek bir farede denendi: tek renk, bölge bölge renk ve kapalı.',
   lightMode: 'Işık modu',
   lmSingle: 'Tek renk',
   lmZones: 'Bölge bölge',
@@ -95,10 +105,9 @@ export const tr: Strings = {
   zFront: 'Ön',
   zMiddle: 'Orta',
   zRear: 'Arka',
-  zoneNote: 'Bölgelerin farede tam yeri ilk denemede doğrulanacak.',
   waveNote: 'Tıklayınca geçen beyaz dalga farenin kendi kayıtlı efekti; bu sürüm onu değiştirmez.',
   saveNote:
-    'Bu sürüm renkleri farenin belleğine kaydetmez; {app}, fare her takıldığında renkleri yeniden gönderir. Uykudan ya da yeniden başlatmadan sonra kalıp kalmadıkları henüz denenmedi.',
+    'Fare renkleri saklamaz: çıkarılınca kendi ışığı geri gelir. {app} renklerini fare her takıldığında, {app} açıldığında ve bilgisayar uykudan uyandığında yeniden gönderir.',
   previewOff: 'Fare önizlemesi: ışıklar kapalı',
   previewOn: 'Fare önizlemesi: ön bölge {front}, orta bölge {middle}, arka bölge {rear}',
   shade: '{hue} tonu {hex}',
@@ -148,7 +157,7 @@ export const tr: Strings = {
   stopManaging: 'Yönetmeyi bırak',
   copied: 'Kopyalandı',
   relDesc:
-    '{app} bu fareye ayar göndermeyi ve fare takıldığında yeniden uygulamayı bırakır. Farenin kendi ayarlarına dönmek için fareyi çıkarıp yeniden tak.',
+    '{app} bu fareye ayar göndermeyi bırakır; fare yeniden takıldığında da göndermez. Farenin kendi rengine ve rapor hızına dönmek için fareyi çıkarıp yeniden tak. DPI kademeleri olduğu gibi kalır: fare onları kendisi saklar.',
   cancel: 'Vazgeç',
 
   // Diagnostic text
@@ -267,8 +276,8 @@ export const tr: Strings = {
   readyTitle: 'Hazırsın',
   readyText: '{device} hazır.',
   readyTextNone: '{app} hazır.',
-  ready1: 'Ayarların bu bilgisayarda saklanır ve fare her takıldığında yeniden uygulanır.',
-  ready2: 'Farenin kendi belleğine bir şey kaydedilmez.',
+  ready1: 'Renk ve rapor hızı bu bilgisayarda saklanır, fare her takıldığında yeniden gönderilir.',
+  ready2: 'DPI kademeleri farenin kendisinde saklanır; değişiklik fare çıkarılınca da kalır.',
   ready3: 'Başka bir SteelSeries cihazı taktığında cihaz listesinde görünür.',
   openApp: "{app}'u aç",
 };

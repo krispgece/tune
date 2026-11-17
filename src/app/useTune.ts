@@ -5,6 +5,7 @@ import {
   type AccessRuleInfo,
   type ActionOutcome,
   type AppInfo,
+  type ApplyOutcome,
   type Backend,
   type DeviceSettings,
   type DeviceSummary,
@@ -53,6 +54,12 @@ const RESUME_GAP = 15_000;
 const TOAST_TIME = 2400;
 
 type StatusMap = Record<string, Partial<Record<SettingGroup, GroupStatus>>>;
+const OUTCOME_STATUS: Record<ApplyOutcome, GroupStatus> = {
+  sent: 'sent',
+  echoed: 'echoed',
+  verified: 'verified',
+  notSent: 'notSent',
+};
 const sendKey = (deviceId: string, group: SettingGroup) => `${deviceId}|${group}`;
 
 function useSystemDark(): boolean {
@@ -202,7 +209,7 @@ export function useTune(backend: Backend) {
   const paused = scan?.reapplyPaused ?? false;
   const isMock = info?.backend === 'mock';
   const sendsSettings = info?.sendsSettings ?? false;
-  const fallbackStatus: GroupStatus = sendsSettings ? 'ok' : 'notSent';
+  const fallbackStatus: GroupStatus = sendsSettings ? 'idle' : 'notSent';
   const ownStatus = statuses[selected.summary.id] ?? {};
   const groupStatus: Record<SettingGroup, GroupStatus> = {
     dpi: ownStatus.dpi ?? fallbackStatus,
@@ -278,12 +285,12 @@ export function useTune(backend: Backend) {
       backend.apply(target.id, group, deviceSettings(current, target.usbId)).then(
         (outcome) => {
           if (sendSeq.current[key] !== n) return;
-          setOne(target.id, group, outcome === 'notSent' ? 'notSent' : 'ok');
+          setOne(target.id, group, OUTCOME_STATUS[outcome]);
           if (group === 'dpi' && outcome !== 'notSent') dpiTaken(target.usbId);
         },
         (e: unknown) => {
           console.error('Sending failed:', e);
-          if (sendSeq.current[key] === n) setOne(target.id, group, 'notSent');
+          if (sendSeq.current[key] === n) setOne(target.id, group, 'failed');
         },
       );
     }, delay);

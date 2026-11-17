@@ -26,8 +26,7 @@ export function Performance({ tune }: { tune: Tune }) {
   const state: DpiState = { stages: d.dpiStages, start: d.startStage, selected };
   const value = d.dpiStages[selected] ?? caps.dpiMin;
   const [draft, setDraft] = useState<string | null>(null);
-  const help = helpItems(tune.i18n, tune.sendsSettings);
-  const status = (group: 'dpi' | 'rate') => applyStatus(d.managed[group], tune.paused, tune.groupStatus[group]);
+  const status = (group: 'dpi' | 'rate') => applyStatus(group, d, tune.paused, tune.groupStatus[group]);
 
   const apply = (next: DpiState | null) => {
     setDraft(null);
@@ -45,7 +44,13 @@ export function Performance({ tune }: { tune: Tune }) {
     <div className="stack stack-20">
       <h1 className="h1">{t('perf')}</h1>
 
-      <SettingCard id="dpi" title={t('dpiStages')} note={t('notVerified')} status={status('dpi')} help={help}>
+      <SettingCard
+        id="dpi"
+        title={t('dpiStages')}
+        note={t('testedOne')}
+        status={status('dpi')}
+        help={helpItems(tune.i18n, 'dpi', tune.sendsSettings)}
+      >
         <div role="group" aria-label={t('stagesGroup')} className="tiles">
           {d.dpiStages.map((dpi, i) => (
             <button
@@ -161,11 +166,18 @@ export function Performance({ tune }: { tune: Tune }) {
 
         <div className="stack" style={{ gap: 4 }}>
           <p className="small-2">{t('dpiNote')}</p>
+          <Note>{t('dpiStored')}</Note>
           <Note>{t('dpiSuggest')}</Note>
         </div>
       </SettingCard>
 
-      <SettingCard id="rate" title={t('rateTitle')} note={t('notVerified')} status={status('rate')} help={help}>
+      <SettingCard
+        id="rate"
+        title={t('rateTitle')}
+        note={t('testedOne')}
+        status={status('rate')}
+        help={helpItems(tune.i18n, 'rate', tune.sendsSettings)}
+      >
         <Segmented
           labelledBy="rate-title"
           className="numbers"

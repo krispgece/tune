@@ -46,15 +46,22 @@ export const en = {
 
   // Apply status
   experimental: 'Experimental',
-  notVerified: 'Not verified on hardware with this mouse yet.',
-  stOk: 'Mouse received',
+  testedOne: 'Tested on one mouse so far.',
+  stEchoed: 'Mouse received',
   stSending: 'Sending…',
+  stSent: 'Sent',
+  stStored: 'On the mouse',
+  stWaiting: 'Not sent yet',
+  stFailed: "Couldn't send",
   stOwn: "Mouse's own",
   stVerified: 'Verified',
   stNotSent: 'Not sent',
   hSending: '{app} is sending the setting to the mouse.',
-  hOk: 'the mouse answered.',
-  hVerified: 'the setting was read back from the mouse (not available for this mouse yet).',
+  hEchoed: 'the mouse answered that it got the setting.',
+  hSent: "the setting went out, but the mouse didn't answer.",
+  hVerified: 'the mouse reported the polling rate back, and it matches.',
+  hStored: 'the mouse keeps its DPI stages itself; {app} sends them only when you change them.',
+  hFailed: "{app} couldn't reach the mouse. It tries again the next time the mouse is plugged in.",
   hOwn: "{app} isn't managing this setting; the mouse's own value applies.",
   hPaused: 'protection is on; nothing is being sent.',
   hNotSent: 'sending is off in this version until the hardware test confirms it; your choice is kept on this computer.',
@@ -75,15 +82,18 @@ export const en = {
   makeStart: 'Make start stage',
   delStage: 'Delete stage',
   dpiNote: "The mouse's DPI button cycles through these stages.",
+  dpiStored:
+    "The mouse stores these stages itself and keeps them when it's unplugged; it starts again on the stage it was last on. {app} sends them only when you change them, and the mouse then switches to the start stage.",
   dpiSuggest: "{app} can't read the mouse's current settings, so the values start as suggestions.",
 
   // Polling rate
   rateTitle: 'Polling rate',
-  rateNote: 'A higher value makes the pointer smoother. This mouse goes up to {max} Hz.',
+  rateNote:
+    "A higher value makes the pointer smoother. This mouse goes up to {max} Hz. It goes back to its own rate when it's unplugged, so {app} sends yours again each time it's plugged in.",
 
   // Lighting
   lightColour: 'Light colour',
-  lightVerified: 'Single colour is tested and works on this mouse; colour by zone is not verified yet.',
+  lightVerified: 'Tested on one mouse so far: single colour, colour by zone and off.',
   lightMode: 'Light mode',
   lmSingle: 'Single colour',
   lmZones: 'By zone',
@@ -93,10 +103,9 @@ export const en = {
   zFront: 'Front',
   zMiddle: 'Middle',
   zRear: 'Rear',
-  zoneNote: 'Where each zone sits on the mouse will be checked in the first test.',
   waveNote: "The white wave on click is the mouse's own stored effect; this version doesn't change it.",
   saveNote:
-    "This version doesn't save colours into the mouse; {app} sends them again each time the mouse is plugged in. Whether they last through sleep or a restart isn't tested yet.",
+    "The mouse doesn't keep colours: when it's unplugged, its own lighting comes back. {app} sends your colours again each time the mouse is plugged in, when {app} starts and when the computer wakes from sleep.",
   previewOff: 'Mouse preview: lights off',
   previewOn: 'Mouse preview: front zone {front}, middle zone {middle}, rear zone {rear}',
   shade: '{hue} shade {hex}',
@@ -145,7 +154,7 @@ export const en = {
   stopManaging: 'Stop managing',
   copied: 'Copied',
   relDesc:
-    "{app} stops sending settings to this mouse and stops re-applying them when it's plugged in. To go back to the mouse's own settings, unplug it and plug it back in.",
+    "{app} stops sending settings to this mouse, including when it's plugged in again. Unplug it and plug it back in to get its own colour and polling rate back. The DPI stages stay as they are: the mouse stores them itself.",
   cancel: 'Cancel',
 
   // Diagnostic text
@@ -264,8 +273,8 @@ export const en = {
   readyTitle: "You're all set",
   readyText: '{device} is ready.',
   readyTextNone: '{app} is ready.',
-  ready1: 'Your settings are kept on this computer and applied again each time the mouse is plugged in.',
-  ready2: 'Nothing is saved into the mouse itself.',
+  ready1: 'Colour and polling rate are kept on this computer and sent again each time the mouse is plugged in.',
+  ready2: "DPI stages are stored on the mouse itself, so a change stays when it's unplugged.",
   ready3: 'Plug in another SteelSeries device and it shows up in the device list.',
   openApp: 'Open {app}',
 };

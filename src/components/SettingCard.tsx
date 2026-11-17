@@ -1,18 +1,17 @@
 import { useState, type ReactNode } from 'react';
 
+import type { SettingGroup } from '../backend/types';
 import type { StringKey, Translator } from '../i18n';
 import type { ApplyStatus } from '../state/devices';
 import { ExperimentalBadge, HelpButton, StatusPill } from './ui';
 
-/** The status names and what they mean, for "What does this mean?". */
-export function helpItems({ t }: Translator, sendsSettings: boolean): [string, string][] {
-  const pairs: [StringKey, StringKey][] = [
-    ['stSending', 'hSending'],
-    ['stOk', 'hOk'],
-    ['stVerified', 'hVerified'],
-    ['stOwn', 'hOwn'],
-    ['stPaused', 'hPaused'],
-  ];
+/** The statuses a setting group can show and what they mean, for "What does this mean?". */
+export function helpItems({ t }: Translator, group: SettingGroup, sendsSettings: boolean): [string, string][] {
+  const pairs: [StringKey, StringKey][] = [['stSending', 'hSending']];
+  if (group === 'rate') pairs.push(['stVerified', 'hVerified']);
+  pairs.push(['stEchoed', 'hEchoed'], ['stSent', 'hSent']);
+  if (group === 'dpi') pairs.push(['stStored', 'hStored']);
+  pairs.push(['stFailed', 'hFailed'], ['stOwn', 'hOwn'], ['stPaused', 'hPaused']);
   if (!sendsSettings) pairs.push(['stNotSent', 'hNotSent']);
   return pairs.map(([term, desc]) => [t(term), t(desc)]);
 }
