@@ -10,6 +10,9 @@ Tune (working name) is a Linux desktop app for SteelSeries devices, built on the
 - Planned stack: Tauri 2 + React/TypeScript; the Rust side calls the library in-process through one adapter module.
 - During development the library comes from the sibling checkout `../steelseriesgg-rs` (branch
   `rival3-gen2/phase0`, not pushed), which also builds the `ssgg` CLI that the test guide uses.
+- Build anything from that checkout with `RUSTFLAGS=-Ctarget-cpu=x86-64` (for example
+  `RUSTFLAGS=-Ctarget-cpu=x86-64 cargo build --release --locked`). Its `.cargo/config.toml` targets x86-64-v3, and
+  the owner's PC has no AVX2, so a default build crashes there.
 - First device: the wired Rival 3 Gen 2. Settings live on the PC and are re-applied on plug-in; nothing is saved to
   the device's memory.
 

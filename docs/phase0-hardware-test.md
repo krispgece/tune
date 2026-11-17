@@ -35,7 +35,10 @@ Her adımda şu başlıklar var:
   çıkarıp taktığında kendi ayarlarına dönmesini bekliyoruz. 7. adım bunu deniyor.
 - **Geri alma:** fareyi USB'den çıkar, 5 saniye bekle, geri tak. Bu, testteki bütün ayarları geri almalı.
 - **Fare doğrudan bilgisayara takılı olsun:** USB çoğaltıcıya ya da klavyedeki USB girişine değil.
-- **Terminal:** `Ctrl+Alt+T` ile aç. Komutları kopyalayabilmek için bu rehberi bilgisayarda da aç.
+- **Terminal:** `Ctrl+Alt+T` ile aç. Komutları kopyalayabilmek için bu rehberi bilgisayarda da aç. Rehber bu
+  bilgisayarda `~/repolar/tune/docs/phase0-hardware-test.md` dosyasında. Komut kutularını görmek için onu Claude
+  uygulamasında aç. Kate gibi bir metin düzenleyicide kutuların yerine `` ``` `` satırları görünür; onlar komutun
+  parçası değil, kopyalama.
 - **İngilizce yazılar normal:** başta tarih-saatli bir `INFO` satırı çıkabilir. Fare komutları ayrıca
   `[EXPERIMENTAL]` ile başlayan sarı bir uyarı yazar: özelliklerin deneysel olduğunu ve ayarların fareye
   kaydedilmediğini söyler (hatırladığın "kaydedilmiyor" notu bu olabilir).
