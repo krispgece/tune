@@ -1,0 +1,12 @@
+# Tune (working name) - access rule for the wired SteelSeries Rival 3 Gen 2 (USB 1038:1870).
+# Grants the logged-in desktop user the mouse's vendor control interface 03 (hidraw) only, through the seat ACL
+# (TAG+="uaccess"). Every other interface of the mouse, the pointer (00) and keyboard (01) ones included, stays
+# root-only. No GROUP or MODE: other users and SSH-only logins get no access.
+# Keep the number below 73: 73-seat-late.rules turns the uaccess tag into the ACL.
+ACTION=="remove", GOTO="tune_rival3g2_end"
+SUBSYSTEM!="hidraw", GOTO="tune_rival3g2_end"
+ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1870", GOTO="tune_rival3g2_dev"
+GOTO="tune_rival3g2_end"
+LABEL="tune_rival3g2_dev"
+ATTRS{bInterfaceNumber}=="03", TAG+="uaccess"
+LABEL="tune_rival3g2_end"
