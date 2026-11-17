@@ -20,6 +20,7 @@ use crate::model::{
     ScanReport, SettingGroup, sort_devices, usb_id,
 };
 use crate::settings::{DeviceSettings, LightMode};
+use crate::sleep::{WakeCounter, time_asleep};
 use crate::{Error, Result};
 
 /// Polling rates a Rival 3 Gen 2 offers, in Hz.
@@ -39,6 +40,7 @@ const DROPS_TO_PAUSE: usize = 2;
 #[derive(Debug, Default)]
 pub struct SsggBackend {
     guard: Mutex<Guard>,
+    wakes: Mutex<WakeCounter>,
     /// Held while sending, so two setting groups never reach a device at once. Holds when the last send ended.
     sending: Mutex<Option<Instant>>,
 }
@@ -87,12 +89,18 @@ impl Backend for SsggBackend {
             .filter(|device| device.page.is_some())
             .map(|device| device.instance.clone())
             .collect();
+        let wakes = self
+            .wakes
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .observe(time_asleep());
         let mut guard = self.guard();
         guard.observe(&present, Instant::now());
         Ok(ScanReport {
             devices,
             access_rule: installed_rule().map(|path| path.to_string_lossy().into_owned()),
             reapply_paused: guard.paused,
+            wakes,
             mock_scenario: None,
         })
     }

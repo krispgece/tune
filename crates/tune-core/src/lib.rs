@@ -11,6 +11,7 @@ pub mod error;
 pub mod mock;
 pub mod model;
 pub mod settings;
+pub mod sleep;
 
 pub use backend::{Backend, BackendKind};
 pub use error::{Error, Result};

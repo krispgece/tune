@@ -39,6 +39,8 @@ export interface ScanReport {
   accessRule: string | null;
   /** Re-applying stopped after the mouse dropped off twice in a short time. */
   reapplyPaused: boolean;
+  /** How many times the computer woke from sleep while the app ran; the mouse may have lost its settings in between. */
+  wakes: number;
   mockScenario: Scenario | null;
 }
 

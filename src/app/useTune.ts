@@ -49,8 +49,6 @@ const SEND_DELAY: Record<SettingGroup, number> = { dpi: 600, rate: 150, light: 1
 /** How long a mouse that has just come back gets before its settings go out again. */
 const REAPPLY_DELAY = 1000;
 const SCAN_INTERVAL = 2000;
-/** A gap this long between two scans means the computer was asleep, which the mouse may not have noticed as a replug. */
-const RESUME_GAP = 15_000;
 const TOAST_TIME = 2400;
 
 type StatusMap = Record<string, Partial<Record<SettingGroup, GroupStatus>>>;
@@ -98,7 +96,8 @@ export function useTune(backend: Backend) {
   const sendTimers = useRef<Record<string, number | undefined>>({});
   /** The plug-in each reachable device last got its settings for, by device id. */
   const reapplied = useRef(new Map<string, string>());
-  const lastTick = useRef(Date.now());
+  /** The wakes from sleep the last scan reported. */
+  const wakes = useRef<number | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
   const scanBusy = useRef(false);
   const permBusy = useRef(false);
@@ -189,9 +188,6 @@ export function useTune(backend: Backend) {
   useEffect(() => {
     if (!loaded) return;
     const id = window.setInterval(() => {
-      const now = Date.now();
-      if (now - lastTick.current > RESUME_GAP) reapplied.current.clear();
-      lastTick.current = now;
       if (scanBusy.current) return;
       scanBusy.current = true;
       void rescan().finally(() => {
@@ -300,6 +296,8 @@ export function useTune(backend: Backend) {
   // gets the settings it forgets. Nothing goes out while re-applying is paused.
   useEffect(() => {
     if (!scan || !loaded) return;
+    if (wakes.current !== null && scan.wakes !== wakes.current) reapplied.current.clear();
+    wakes.current = scan.wakes;
     const here = new Set(reachable(scan).map((d) => d.id));
     for (const id of [...reapplied.current.keys()]) if (!here.has(id)) reapplied.current.delete(id);
     if (scan.reapplyPaused || !sendsSettings) return;

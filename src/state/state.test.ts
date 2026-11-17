@@ -40,6 +40,7 @@ const report = (devices: DeviceSummary[], accessRule: string | null = null): Sca
   devices,
   accessRule,
   reapplyPaused: false,
+  wakes: 0,
   mockScenario: null,
 });
 

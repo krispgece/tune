@@ -79,6 +79,7 @@ export class BrowserMock implements Backend {
       devices,
       accessRule: this.rule ? `${RULE_DIR}/${RULE_FILE_NAME}` : null,
       reapplyPaused: this.paused,
+      wakes: 0,
       mockScenario: this.scenario,
     };
   }

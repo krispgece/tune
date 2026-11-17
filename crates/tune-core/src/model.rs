@@ -98,6 +98,8 @@ pub struct ScanReport {
     pub access_rule: Option<String>,
     /// Re-applying settings is paused for safety.
     pub reapply_paused: bool,
+    /// How many times the computer woke from sleep while the app ran. The mouse may have lost its settings in between.
+    pub wakes: u32,
     /// The mock backend's current state; `None` with real devices.
     pub mock_scenario: Option<Scenario>,
 }
@@ -196,6 +198,7 @@ mod tests {
         let json = serde_json::to_value(&report)?;
         assert!(json.get("accessRule").is_some());
         assert!(json.get("reapplyPaused").is_some());
+        assert!(json.get("wakes").is_some());
         Ok(())
     }
 }
