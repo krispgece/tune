@@ -8,14 +8,47 @@ Unofficial. Not affiliated with or endorsed by SteelSeries; see the [legal notic
 
 ## Status
 
-Early planning and hardware testing; there is no app to install yet.
+Phase 1: the app's screens are built and run on fake devices. With real devices the app lists what is plugged in,
+but it sends nothing to a device yet: a changed setting stays on the computer, and the app says so. Sending comes
+after the Phase 0 hardware test (`docs/`).
 
-- First supported device: the wired Rival 3 Gen 2.
+- First supported device: the wired Rival 3 Gen 2. Other SteelSeries devices that ssgg recognizes show up as "Not
+  supported yet", and nothing is sent to them.
 - Settings stay on the computer and are applied again whenever the device is plugged in. Nothing is written to the
   device's own memory.
+- Features keep an "Experimental" badge until they are verified on hardware.
+- The interface is in English by default and also in Turkish, with light and dark themes.
+
+## Build and run
+
+Requirements:
+
+- Rust (the version in `Cargo.toml`) and Node.js 18 or newer with npm.
+- The ssgg checkout next to this one, at `../steelseriesgg-rs`, on the branch `rival3-gen2/phase0`.
+- On Debian or Ubuntu: `sudo apt install build-essential pkg-config libwebkit2gtk-4.1-dev`.
+
+`.cargo/config.toml` builds for the baseline x86-64 CPU, so the app also runs on processors without AVX2. If you
+set `RUSTFLAGS` yourself, keep `-Ctarget-cpu=x86-64` in it.
+
+```sh
+npm install
+npm run app:mock     # the app with fake devices; real hardware is not touched
+npm run app          # the app with the plugged-in devices (device list only for now)
+npm run app:release  # release build, written to target/release/tune
+npm run dev          # the interface alone in a browser (http://localhost:1420), with built-in fake devices
+```
+
+With fake devices, a bar at the top switches between the situations the app handles (first launch, several devices,
+mouse unplugged, no permission, and so on). The app keeps its settings in `~/.config/local.tune.desktop/`; the fake
+devices keep theirs in memory only.
+
+Tests: `npm test` and `cargo test --locked`.
 
 ## Contents
 
+- `src/`: the interface (React, TypeScript), its English and Turkish strings and both themes.
+- `src-tauri/`: the desktop shell (Tauri 2): the window and the commands the interface calls.
+- `crates/tune-core/`: the adapter to the ssgg library, the fake devices and the settings file.
 - `docs/`: hardware test guides (in Turkish).
 - `packaging/linux/`: a udev rule that gives the user signed in at the computer access to the mouse's settings
   interface only.
