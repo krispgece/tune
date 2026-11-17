@@ -1,0 +1,17 @@
+import { invoke } from '@tauri-apps/api/core';
+
+import type { Backend } from './types';
+
+/** The commands of `src-tauri/src/lib.rs`. */
+export const tauriBackend: Backend = {
+  appInfo: () => invoke('app_info'),
+  scan: () => invoke('scan_devices'),
+  loadSettings: () => invoke('load_settings'),
+  saveSettings: (settings) => invoke('save_settings', { settings }),
+  apply: (deviceId, group) => invoke('apply_settings', { deviceId, group }),
+  requestAccess: () => invoke('request_access'),
+  removeAccess: () => invoke('remove_access'),
+  resumeReapply: () => invoke('resume_reapply'),
+  setMockScenario: (scenario) => invoke('set_mock_scenario', { scenario }),
+  accessRule: () => invoke('access_rule'),
+};
