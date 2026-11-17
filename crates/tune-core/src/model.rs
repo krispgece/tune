@@ -62,6 +62,9 @@ pub struct DeviceSummary {
     pub page: Option<DevicePage>,
     pub access: DeviceAccess,
     pub caps: Option<MouseCaps>,
+    /// Changes each time the device is plugged in again and stays the same while it stays plugged in. The app sends
+    /// the settings the mouse forgets again when it changes.
+    pub instance: String,
 }
 
 /// The mock backend's states. They match the states of the approved mockup.
@@ -110,9 +113,13 @@ pub enum SettingGroup {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ApplyOutcome {
-    /// The device took the setting.
-    Received,
-    /// Nothing was sent: sending stays off until the hardware test confirms it.
+    /// Sent, but the device did not answer every part of it.
+    Sent,
+    /// The device answered that it took the setting.
+    Echoed,
+    /// The device reported the value back, and it is the one just sent.
+    Verified,
+    /// Nothing was sent: re-applying is paused for safety.
     NotSent,
 }
 
@@ -154,6 +161,7 @@ mod tests {
             page,
             access: DeviceAccess::NotChecked,
             caps: None,
+            instance: id.to_owned(),
         }
     }
 
@@ -183,6 +191,7 @@ mod tests {
         assert_eq!(serde_json::to_string(&Scenario::Replug)?, "\"replug\"");
         assert_eq!(serde_json::to_string(&DevicePage::Rival3Gen2)?, "\"rival3Gen2\"");
         assert_eq!(serde_json::to_string(&ApplyOutcome::NotSent)?, "\"notSent\"");
+        assert_eq!(serde_json::to_string(&ApplyOutcome::Verified)?, "\"verified\"");
         let report = ScanReport::default();
         let json = serde_json::to_value(&report)?;
         assert!(json.get("accessRule").is_some());

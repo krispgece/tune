@@ -5,7 +5,16 @@ import { APP_NAME } from '../identity';
 import { RULE_DIR, RULE_FILE_NAME } from '../state/commands';
 import { RIVAL_CAPS } from '../state/devices';
 import { defaultSettings } from '../state/settings';
-import type { Backend, DeviceSummary, ScanReport, Scenario, Settings } from './types';
+import type {
+  ApplyOutcome,
+  Backend,
+  DeviceSettings,
+  DeviceSummary,
+  ScanReport,
+  Scenario,
+  SettingGroup,
+  Settings,
+} from './types';
 
 interface Delays {
   access: number;
@@ -48,6 +57,7 @@ export class BrowserMock implements Backend {
         page: 'rival3Gen2',
         access: this.access ? 'allowed' : 'denied',
         caps: RIVAL_CAPS,
+        instance: 'mock',
       });
     }
     if (this.scenario === 'multi') {
@@ -60,6 +70,7 @@ export class BrowserMock implements Backend {
         page: null,
         access: 'notChecked' as const,
         caps: null,
+        instance: usbId,
       });
       devices.push(unsupported('1038:1628', 'Apex Pro TKL (2023)', 'keyboard', false));
       devices.push(unsupported('1038:227e', 'Arctis Nova 7 Gen 2', 'headset', true));
@@ -81,9 +92,11 @@ export class BrowserMock implements Backend {
     return structuredClone(settings);
   }
 
-  async apply() {
+  /** Answers the way the real mouse does: the polling rate is read back, DPI and colour are echoed. */
+  async apply(_deviceId: string, group: SettingGroup, _settings: DeviceSettings): Promise<ApplyOutcome> {
     await wait(this.delays.apply);
-    return this.paused ? ('notSent' as const) : ('received' as const);
+    if (this.paused) return 'notSent';
+    return group === 'rate' ? 'verified' : 'echoed';
   }
 
   async requestAccess() {

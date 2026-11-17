@@ -26,6 +26,8 @@ export interface DeviceSummary {
   page: DevicePage | null;
   access: DeviceAccess;
   caps: MouseCaps | null;
+  /** Changes each time the device is plugged in again; stays the same while it stays plugged in. */
+  instance: string;
 }
 
 export const SCENARIOS = ['setup', 'normal', 'own', 'multi', 'unplugged', 'noperm', 'replug', 'guard'] as const;
@@ -42,7 +44,11 @@ export interface ScanReport {
 
 export type SettingGroup = 'dpi' | 'rate' | 'light';
 export const SETTING_GROUPS: SettingGroup[] = ['dpi', 'rate', 'light'];
-export type ApplyOutcome = 'received' | 'notSent';
+/**
+ * How far a send got: `sent` without an answer, `echoed` when the device answered that it took the setting,
+ * `verified` when it reported the value back, `notSent` while re-applying is paused.
+ */
+export type ApplyOutcome = 'sent' | 'echoed' | 'verified' | 'notSent';
 export type ActionOutcome = 'done' | 'notAvailable';
 
 export type Language = 'en' | 'tr';
@@ -65,6 +71,8 @@ export interface DeviceSettings {
   lightMode: LightMode;
   color: string;
   zones: Zones;
+  /** The DPI stages changed and the mouse hasn't taken them yet; the mouse keeps its DPI stages itself. */
+  dpiPending: boolean;
 }
 
 export interface Settings {
@@ -79,7 +87,7 @@ export interface AppInfo {
   name: string;
   version: string;
   backend: 'device' | 'mock';
-  /** False while every apply is a stub: choices stay on this computer. */
+  /** False when sending is off: choices stay on this computer. */
   sendsSettings: boolean;
 }
 
@@ -94,7 +102,7 @@ export interface Backend {
   scan(): Promise<ScanReport>;
   loadSettings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<Settings>;
-  apply(deviceId: string, group: SettingGroup): Promise<ApplyOutcome>;
+  apply(deviceId: string, group: SettingGroup, settings: DeviceSettings): Promise<ApplyOutcome>;
   requestAccess(): Promise<ActionOutcome>;
   removeAccess(): Promise<ActionOutcome>;
   resumeReapply(): Promise<ActionOutcome>;

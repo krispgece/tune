@@ -30,6 +30,7 @@ const rival: DeviceSummary = {
   page: 'rival3Gen2',
   access: 'allowed',
   caps,
+  instance: 'first plug-in',
 };
 const keyboard: DeviceSummary = { ...rival, id: '1038:1628', usbId: '1038:1628', kind: 'keyboard', page: null };
 const report = (devices: DeviceSummary[], accessRule: string | null = null): ScanReport => ({

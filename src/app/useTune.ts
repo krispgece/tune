@@ -244,9 +244,14 @@ export function useTune(backend: Backend) {
     }
     setOne(group, 'sending');
     sendTimers.current[group] = window.setTimeout(() => {
-      backend.apply(deviceId, group).then(
-        (outcome) => sendSeq.current[group] === n && setOne(group, outcome === 'received' ? 'ok' : 'notSent'),
-        () => sendSeq.current[group] === n && setOne(group, 'notSent'),
+      const current = latest.current;
+      if (!current) return;
+      backend.apply(deviceId, group, deviceSettings(current, usbId)).then(
+        (outcome) => sendSeq.current[group] === n && setOne(group, outcome === 'notSent' ? 'notSent' : 'ok'),
+        (e: unknown) => {
+          console.error('Sending failed:', e);
+          if (sendSeq.current[group] === n) setOne(group, 'notSent');
+        },
       );
     }, SEND_DELAY);
   };

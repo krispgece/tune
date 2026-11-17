@@ -1,4 +1,4 @@
-//! The app's settings, kept on this computer as one JSON file. Nothing is saved to any device.
+//! The app's settings, kept on this computer as one JSON file.
 //!
 //! Loading never fails on bad content: a file that does not parse is moved aside and the defaults are used, and
 //! values out of range are brought back into range, so a hand-edited file cannot break the window.
@@ -83,6 +83,9 @@ pub struct DeviceSettings {
     pub light_mode: LightMode,
     pub color: String,
     pub zones: Zones,
+    /// The DPI stages changed and the mouse has not taken them yet. The mouse keeps its DPI stages itself, so they are
+    /// sent on plug-in only while this is set; colour and polling rate are sent every time.
+    pub dpi_pending: bool,
 }
 
 impl Default for DeviceSettings {
@@ -95,6 +98,7 @@ impl Default for DeviceSettings {
             light_mode: LightMode::Single,
             color: "#1fc8ff".to_owned(),
             zones: Zones::default(),
+            dpi_pending: false,
         }
     }
 }
@@ -299,6 +303,7 @@ mod tests {
                 front: "#f00".to_owned(),
                 ..Zones::default()
             },
+            dpi_pending: true,
         };
         settings.devices.insert("1038:1870".to_owned(), mouse);
 
@@ -324,6 +329,7 @@ mod tests {
         assert_eq!(json["theme"], "system");
         assert_eq!(json["devices"]["1038:1870"]["pollRateHz"], 1000);
         assert_eq!(json["devices"]["1038:1870"]["lightMode"], "single");
+        assert_eq!(json["devices"]["1038:1870"]["dpiPending"], false);
         Ok(())
     }
 
@@ -342,6 +348,7 @@ mod tests {
         assert_eq!(mouse.poll_rate_hz, 250);
         assert_eq!(mouse.dpi_stages, DeviceSettings::default().dpi_stages);
         assert_eq!(mouse.managed, Managed::default());
+        assert!(!mouse.dpi_pending);
         Ok(())
     }
 

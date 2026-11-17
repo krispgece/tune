@@ -10,7 +10,7 @@ use tune_core::access::RULE_FILE_NAME;
 use tune_core::adapter::SsggBackend;
 use tune_core::mock::MockBackend;
 use tune_core::model::{ActionOutcome, ApplyOutcome, ScanReport, Scenario, SettingGroup};
-use tune_core::settings::{Settings, SettingsStore};
+use tune_core::settings::{DeviceSettings, Settings, SettingsStore};
 use tune_core::{Backend, BackendKind};
 
 /// The access rule among the app's resources; `bundle.resources` in `tauri.conf.json` puts it there.
@@ -84,8 +84,19 @@ async fn save_settings(app: AppHandle, settings: Settings) -> CommandResult<Sett
 }
 
 #[tauri::command]
-async fn apply_settings(app: AppHandle, device_id: String, group: SettingGroup) -> CommandResult<ApplyOutcome> {
-    blocking(app, move |state| Ok(state.backend.apply(&device_id, group))).await
+async fn apply_settings(
+    app: AppHandle,
+    device_id: String,
+    group: SettingGroup,
+    settings: DeviceSettings,
+) -> CommandResult<ApplyOutcome> {
+    blocking(app, move |state| {
+        state
+            .backend
+            .apply(&device_id, group, &settings.sanitized())
+            .map_err(|e| e.to_string())
+    })
+    .await
 }
 
 #[tauri::command]

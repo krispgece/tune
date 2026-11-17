@@ -22,6 +22,10 @@ pub enum Error {
     StoreUnavailable,
     #[error("this works only with the mock backend")]
     NotMock,
+    #[error("the device is not plugged in")]
+    DeviceGone,
+    #[error("could not send the setting: {0}")]
+    Send(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

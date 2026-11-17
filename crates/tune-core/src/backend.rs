@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 use crate::model::{ActionOutcome, ApplyOutcome, ScanReport, Scenario, SettingGroup};
+use crate::settings::DeviceSettings;
 use crate::{Error, Result};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -14,8 +15,8 @@ pub enum BackendKind {
 
 /// What the app shell asks of a device backend.
 ///
-/// Every action that would change a device or the system (`apply`, `request_access`, `remove_access`,
-/// `resume_reapply`) is a stub on the real backend until the owner's hardware test confirms it.
+/// The real backend sends settings; installing and removing the access rule (`request_access`, `remove_access`)
+/// are stubs on it until the system's password window is wired up.
 pub trait Backend: Send + Sync {
     fn kind(&self) -> BackendKind;
 
@@ -25,8 +26,9 @@ pub trait Backend: Send + Sync {
     /// Lists the devices from what the system already knows about them. Nothing is sent to any device.
     fn scan(&self) -> Result<ScanReport>;
 
-    /// Sends one setting group of a device's saved settings.
-    fn apply(&self, device_id: &str, group: SettingGroup) -> ApplyOutcome;
+    /// Sends one setting group of a device, taken from `settings`, and says how far it got. Nothing is sent while
+    /// re-applying is paused.
+    fn apply(&self, device_id: &str, group: SettingGroup, settings: &DeviceSettings) -> Result<ApplyOutcome>;
 
     /// Installs the access rule through the system's password window.
     fn request_access(&self) -> ActionOutcome;

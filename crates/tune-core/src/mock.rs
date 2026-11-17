@@ -11,6 +11,7 @@ use crate::model::{
     ActionOutcome, ApplyOutcome, Connection, DeviceAccess, DeviceKind, DevicePage, DeviceSummary, MouseCaps,
     ScanReport, Scenario, SettingGroup, sort_devices,
 };
+use crate::settings::DeviceSettings;
 
 /// How long the fake password window takes.
 const ACCESS_DELAY: Duration = Duration::from_millis(1600);
@@ -121,13 +122,16 @@ impl Backend for MockBackend {
         })
     }
 
-    fn apply(&self, _device_id: &str, _group: SettingGroup) -> ApplyOutcome {
+    /// Answers the way the real mouse does: the polling rate is read back, DPI and colour are echoed.
+    fn apply(&self, _device_id: &str, group: SettingGroup, _settings: &DeviceSettings) -> Result<ApplyOutcome> {
         self.wait(APPLY_DELAY);
         if self.state().paused {
-            ApplyOutcome::NotSent
-        } else {
-            ApplyOutcome::Received
+            return Ok(ApplyOutcome::NotSent);
         }
+        Ok(match group {
+            SettingGroup::Rate => ApplyOutcome::Verified,
+            SettingGroup::Dpi | SettingGroup::Light => ApplyOutcome::Echoed,
+        })
     }
 
     fn request_access(&self) -> ActionOutcome {
@@ -186,6 +190,7 @@ fn rival(access: DeviceAccess) -> DeviceSummary {
         page: Some(DevicePage::Rival3Gen2),
         access,
         caps: Some(rival_caps()),
+        instance: "mock".to_owned(),
     }
 }
 
@@ -199,6 +204,7 @@ fn unsupported(usb_id: &str, name: &str, kind: DeviceKind, connection: Connectio
         page: None,
         access: DeviceAccess::NotChecked,
         caps: None,
+        instance: usb_id.to_owned(),
     }
 }
 
@@ -261,10 +267,38 @@ mod tests {
         mock.set_mock_scenario(Scenario::Guard)?;
         let guard = mock.scan()?;
         assert!(guard.reapply_paused);
-        assert_eq!(mock.apply("1038:1870", SettingGroup::Rate), ApplyOutcome::NotSent);
+        let settings = DeviceSettings::default();
+        assert_eq!(
+            mock.apply("1038:1870", SettingGroup::Rate, &settings)?,
+            ApplyOutcome::NotSent
+        );
         assert_eq!(mock.resume_reapply(), ActionOutcome::Done);
         assert!(!mock.scan()?.reapply_paused);
-        assert_eq!(mock.apply("1038:1870", SettingGroup::Rate), ApplyOutcome::Received);
+        assert_eq!(
+            mock.apply("1038:1870", SettingGroup::Rate, &settings)?,
+            ApplyOutcome::Verified
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn the_fake_mouse_answers_like_the_real_one() -> Result<()> {
+        let mock = MockBackend::without_delays();
+        mock.set_mock_scenario(Scenario::Normal)?;
+        let settings = DeviceSettings::default();
+        assert_eq!(
+            mock.apply("1038:1870", SettingGroup::Dpi, &settings)?,
+            ApplyOutcome::Echoed
+        );
+        assert_eq!(
+            mock.apply("1038:1870", SettingGroup::Rate, &settings)?,
+            ApplyOutcome::Verified
+        );
+        assert_eq!(
+            mock.apply("1038:1870", SettingGroup::Light, &settings)?,
+            ApplyOutcome::Echoed
+        );
+        assert_eq!(mock.scan()?.devices[0].instance, "mock");
         Ok(())
     }
 

@@ -29,6 +29,7 @@ const RIVAL_3_GEN_2: DeviceSummary = {
   page: 'rival3Gen2',
   access: 'notChecked',
   caps: null,
+  instance: '',
 };
 
 export function deviceEntries(scan: ScanReport | null): DeviceEntry[] {

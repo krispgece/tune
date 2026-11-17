@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { defaultDeviceSettings } from '../state/settings';
 import { BrowserMock } from './browserMock';
 
 const quick = () => new BrowserMock({ access: 0, apply: 0 });
@@ -42,10 +43,20 @@ describe('browser mock', () => {
     const mock = quick();
     await mock.setMockScenario('guard');
     expect((await mock.scan()).reapplyPaused).toBe(true);
-    expect(await mock.apply()).toBe('notSent');
+    expect(await mock.apply('1038:1870', 'rate', defaultDeviceSettings())).toBe('notSent');
     await mock.resumeReapply();
     expect((await mock.scan()).mockScenario).toBe('normal');
-    expect(await mock.apply()).toBe('received');
+    expect(await mock.apply('1038:1870', 'rate', defaultDeviceSettings())).toBe('verified');
+  });
+
+  it('answers like the real mouse: the polling rate reads back, DPI and colour are echoed', async () => {
+    const mock = quick();
+    await mock.setMockScenario('normal');
+    const settings = defaultDeviceSettings();
+    expect(await mock.apply('1038:1870', 'dpi', settings)).toBe('echoed');
+    expect(await mock.apply('1038:1870', 'rate', settings)).toBe('verified');
+    expect(await mock.apply('1038:1870', 'light', settings)).toBe('echoed');
+    expect((await mock.scan()).devices[0]?.instance).toBe('mock');
   });
 
   it('has the rule installed but not yet on the mouse', async () => {
