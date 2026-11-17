@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 Tune (working name) is a Linux desktop app for SteelSeries devices, built on the ssgg Rust library
-(`steelseries_gg`). Phase 1 is in place: every screen of the approved mockup runs on fake devices; with real devices
-the app only lists them, and every action that would send to a device is a stub until the Phase 0 hardware test.
+(`steelseries_gg`). Phase 1 is in place: every screen of the approved mockup runs on fake devices, and with the wired
+Rival 3 Gen 2 the app sends DPI stages, polling rate and lighting. Installing or removing the access rule from the app
+(the system's password window) is still a stub; the app shows the terminal commands instead.
 
 - Stack: Tauri 2 + React/TypeScript (Vite). The Rust side calls the library in-process through one adapter module.
 - During development the library comes from the sibling checkout `../steelseriesgg-rs` (branch
@@ -15,14 +16,17 @@ the app only lists them, and every action that would send to a device is a stub 
   `RUSTFLAGS=-Ctarget-cpu=x86-64 cargo build --release --locked`). Its `.cargo/config.toml` targets x86-64-v3, and
   the owner's PC has no AVX2, so a default build crashes there. This repository's own `.cargo/config.toml` already
   sets the baseline; a `RUSTFLAGS` variable replaces it, so keep the flag in one you set.
-- First device: the wired Rival 3 Gen 2. Settings live on the PC and are re-applied on plug-in; nothing is saved to
-  the device's memory.
+- First device: the wired Rival 3 Gen 2. Colour and polling rate live on the PC and are sent again on plug-in, at
+  app start and after the computer wakes (the mouse forgets them). The mouse stores DPI stages and the stage it was
+  last on by itself, so the app sends DPI only when it changes (`dpiPending` in the settings). The app sends no save
+  command. A mouse that drops off twice soon after a send pauses re-applying until the user tries again.
 
 ## Layout
 
 ```
-crates/tune-core/   adapter.rs (the only module that calls steelseries_gg; read-only device list, apply stubbed),
-                    mock.rs (fake devices and situations), settings.rs (settings file), access.rs (udev rule name)
+crates/tune-core/   adapter.rs (the only module that calls steelseries_gg: device list, sending, re-apply pause),
+                    mock.rs (fake devices and situations), settings.rs (settings file), access.rs (udev rule name,
+                    node access, which plug-in a node belongs to)
 src-tauri/          the window and the commands the interface calls; picks the mock with --mock or TUNE_BACKEND=mock
 src/                React UI: app/useTune.ts (state and actions), screens/, components/, state/ (pure logic),
                     i18n/ (en.ts, tr.ts), theme/ (tokens computed for light and dark), backend/ (Tauri calls and
@@ -36,7 +40,7 @@ docs/               the Phase 0 hardware test guide (Turkish)
 | Step | Command |
 |------|---------|
 | App, fake devices | `npm run app:mock` |
-| App, real devices (list only) | `npm run app` |
+| App, real devices (sends to the mouse: the owner runs it) | `npm run app` |
 | Interface in a browser, in-page fake devices | `npm run dev` (port 1420) |
 | Release binary | `npm run app:release` (`target/release/tune`) |
 | Tests | `npm test`, `cargo test --locked` |
@@ -68,7 +72,9 @@ vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune
   the owner may be in Turkish.
 - **UI language.** English by default; every UI string also ships in Turkish.
 - **Hardware steps.** Prepare the exact commands and let the owner run them; record only results they confirm. Never
-  run device-writing commands, `sudo` or udev changes yourself.
+  run device-writing commands, `sudo` or udev changes yourself. The app on real devices (`npm run app`,
+  `target/release/tune` without `--mock`) sends settings to a plugged-in mouse, so it counts as device-writing; check
+  your work with `npm run app:mock` or `npm run dev`.
 - **udev rule.** hidraw of the one settings interface only, `TAG+="uaccess"`, no `GROUP`/`MODE`, numbered below 73;
   check it with `udevadm verify`.
 - **Publishing.** No GitHub repository, push or release without the owner's explicit go-ahead.

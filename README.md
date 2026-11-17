@@ -8,14 +8,17 @@ Unofficial. Not affiliated with or endorsed by SteelSeries; see the [legal notic
 
 ## Status
 
-Phase 1: the app's screens are built and run on fake devices. With real devices the app lists what is plugged in,
-but it sends nothing to a device yet: a changed setting stays on the computer, and the app says so. Sending comes
-after the Phase 0 hardware test (`docs/`).
+Phase 1: the app's screens are built and also run on fake devices. With a wired Rival 3 Gen 2 the app sends DPI
+stages, the polling rate and the lighting (one colour, by zone or off), and shows what the mouse answered. These were
+tried on one mouse in the Phase 0 hardware test (`docs/`).
 
 - First supported device: the wired Rival 3 Gen 2. Other SteelSeries devices that ssgg recognizes show up as "Not
   supported yet", and nothing is sent to them.
-- Settings stay on the computer and are applied again whenever the device is plugged in. Nothing is written to the
-  device's own memory.
+- The mouse forgets its colour and polling rate when it's unplugged, so the app keeps them on the computer and sends
+  them again whenever the mouse is plugged in, when the app starts and when the computer wakes from sleep. The mouse
+  stores its DPI stages itself, so the app sends them only when they change. The app sends no command to save
+  settings into the mouse.
+- If the mouse drops off twice right after the app sent it something, the app stops sending until you try again.
 - Features keep an "Experimental" badge until they are verified on hardware.
 - The interface is in English by default and also in Turkish, with light and dark themes.
 
@@ -33,7 +36,7 @@ set `RUSTFLAGS` yourself, keep `-Ctarget-cpu=x86-64` in it.
 ```sh
 npm install
 npm run app:mock     # the app with fake devices; real hardware is not touched
-npm run app          # the app with the plugged-in devices (device list only for now)
+npm run app          # the app with the plugged-in devices; it sends settings to the Rival 3 Gen 2
 npm run app:release  # release build, written to target/release/tune
 npm run dev          # the interface alone in a browser (http://localhost:1420), with built-in fake devices
 ```
