@@ -2,12 +2,12 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import {
-  SETTING_GROUPS,
   type AccessRuleInfo,
   type ActionOutcome,
   type AppInfo,
   type Backend,
   type DeviceSettings,
+  type DeviceSummary,
   type Language,
   type LightMode,
   type ScanReport,
@@ -22,9 +22,12 @@ import { normalizeHex } from '../theme/color';
 import { cssVariables, tokens, type Mode } from '../theme/tokens';
 import { copyText } from '../state/clipboard';
 import {
+  comebacks,
   deviceEntries,
   needsPermission,
   needsReplug,
+  reachable,
+  reapplyGroups,
   RIVAL_USB_ID,
   type DeviceEntry,
   type GroupStatus,
@@ -40,15 +43,17 @@ export type ToastKind = 'device' | 'perm' | 'settings';
 export type Place = 'firstRun' | 'app';
 
 const SAVE_DELAY = 250;
-const SEND_DELAY = 150;
+/** How long a group waits for further changes before it is sent. DPI waits longer: the mouse stores it each time. */
+const SEND_DELAY: Record<SettingGroup, number> = { dpi: 600, rate: 150, light: 150 };
+/** How long a mouse that has just come back gets before its settings go out again. */
+const REAPPLY_DELAY = 1000;
 const SCAN_INTERVAL = 2000;
+/** A gap this long between two scans means the computer was asleep, which the mouse may not have noticed as a replug. */
+const RESUME_GAP = 15_000;
 const TOAST_TIME = 2400;
 
-const allStatus = (status: GroupStatus): Record<SettingGroup, GroupStatus> => ({
-  dpi: status,
-  rate: status,
-  light: status,
-});
+type StatusMap = Record<string, Partial<Record<SettingGroup, GroupStatus>>>;
+const sendKey = (deviceId: string, group: SettingGroup) => `${deviceId}|${group}`;
 
 function useSystemDark(): boolean {
   const query = '(prefers-color-scheme: dark)';
@@ -71,7 +76,7 @@ export function useTune(backend: Backend) {
   const [scanError, setScanError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [screen, setScreen] = useState<Screen>('perf');
-  const [groupStatus, setGroupStatus] = useState(allStatus('ok'));
+  const [statuses, setStatuses] = useState<StatusMap>({});
   const [dpiSelected, setDpiSelected] = useState<number | null>(null);
   const [firstRunStep, setFirstRunStep] = useState<FirstRunStep>('welcome');
   const [perm, setPerm] = useState<PermState>('idle');
@@ -82,8 +87,11 @@ export function useTune(backend: Backend) {
 
   const latest = useRef<Settings | null>(null);
   const saveTimer = useRef<number | undefined>(undefined);
-  const sendSeq = useRef<Record<SettingGroup, number>>({ dpi: 0, rate: 0, light: 0 });
-  const sendTimers = useRef<Partial<Record<SettingGroup, number>>>({});
+  const sendSeq = useRef<Record<string, number>>({});
+  const sendTimers = useRef<Record<string, number | undefined>>({});
+  /** The plug-in each reachable device last got its settings for, by device id. */
+  const reapplied = useRef(new Map<string, string>());
+  const lastTick = useRef(Date.now());
   const toastTimer = useRef<number | undefined>(undefined);
   const scanBusy = useRef(false);
   const permBusy = useRef(false);
@@ -161,7 +169,6 @@ export function useTune(backend: Backend) {
       if (!alive) return;
       setInfo(appInfo);
       setRule(accessRule);
-      setGroupStatus(allStatus(appInfo.sendsSettings ? 'ok' : 'notSent'));
       latest.current = loaded;
       setSettings(loaded);
       await rescan();
@@ -175,6 +182,9 @@ export function useTune(backend: Backend) {
   useEffect(() => {
     if (!loaded) return;
     const id = window.setInterval(() => {
+      const now = Date.now();
+      if (now - lastTick.current > RESUME_GAP) reapplied.current.clear();
+      lastTick.current = now;
       if (scanBusy.current) return;
       scanBusy.current = true;
       void rescan().finally(() => {
@@ -192,6 +202,13 @@ export function useTune(backend: Backend) {
   const paused = scan?.reapplyPaused ?? false;
   const isMock = info?.backend === 'mock';
   const sendsSettings = info?.sendsSettings ?? false;
+  const fallbackStatus: GroupStatus = sendsSettings ? 'ok' : 'notSent';
+  const ownStatus = statuses[selected.summary.id] ?? {};
+  const groupStatus: Record<SettingGroup, GroupStatus> = {
+    dpi: ownStatus.dpi ?? fallbackStatus,
+    rate: ownStatus.rate ?? fallbackStatus,
+    light: ownStatus.light ?? fallbackStatus,
+  };
   const presentPage = entries.find((e) => e.present && e.summary.page);
   const accessAllowed = presentPage ? presentPage.summary.access !== 'denied' : Boolean(scan?.accessRule);
 
@@ -224,45 +241,81 @@ export function useTune(backend: Backend) {
     if (await copyText(text)) showToast(kind);
   };
 
-  // Sending one setting group to the selected device
-  const setOne = (group: SettingGroup, status: GroupStatus) => setGroupStatus((prev) => ({ ...prev, [group]: status }));
+  // Sending setting groups to a device
+  const setOne = (deviceId: string, group: SettingGroup, status: GroupStatus) =>
+    setStatuses((prev) => ({ ...prev, [deviceId]: { ...prev[deviceId], [group]: status } }));
 
-  const cancelSends = () => {
-    for (const group of SETTING_GROUPS) {
-      sendSeq.current[group] += 1;
-      window.clearTimeout(sendTimers.current[group]);
+  /** Drops the sends that haven't finished, for one device or for all; their answers are ignored. */
+  const cancelSends = (deviceId?: string) => {
+    for (const key of Object.keys(sendSeq.current)) {
+      if (deviceId !== undefined && !key.startsWith(`${deviceId}|`)) continue;
+      sendSeq.current[key] = (sendSeq.current[key] ?? 0) + 1;
+      window.clearTimeout(sendTimers.current[key]);
     }
   };
 
-  const send = (group: SettingGroup, deviceId: string) => {
-    sendSeq.current[group] += 1;
-    const n = sendSeq.current[group];
-    window.clearTimeout(sendTimers.current[group]);
+  /** The mouse has taken the DPI stages it was sent, so they need not go out again when it comes back. */
+  const dpiTaken = (usb: string) => {
+    const current = latest.current;
+    if (current && deviceSettings(current, usb).dpiPending)
+      update((s) => withDevice(s, usb, { ...deviceSettings(s, usb), dpiPending: false }));
+  };
+
+  /** Sends one setting group with the values it has when the wait is over; a newer send of it replaces this one. */
+  const send = (target: DeviceSummary, group: SettingGroup, delay = SEND_DELAY[group]) => {
+    const key = sendKey(target.id, group);
+    const n = (sendSeq.current[key] ?? 0) + 1;
+    sendSeq.current[key] = n;
+    window.clearTimeout(sendTimers.current[key]);
     if (!sendsSettings) {
-      setOne(group, 'notSent');
+      setOne(target.id, group, 'notSent');
       return;
     }
-    setOne(group, 'sending');
-    sendTimers.current[group] = window.setTimeout(() => {
+    setOne(target.id, group, 'sending');
+    sendTimers.current[key] = window.setTimeout(() => {
       const current = latest.current;
       if (!current) return;
-      backend.apply(deviceId, group, deviceSettings(current, usbId)).then(
-        (outcome) => sendSeq.current[group] === n && setOne(group, outcome === 'notSent' ? 'notSent' : 'ok'),
+      backend.apply(target.id, group, deviceSettings(current, target.usbId)).then(
+        (outcome) => {
+          if (sendSeq.current[key] !== n) return;
+          setOne(target.id, group, outcome === 'notSent' ? 'notSent' : 'ok');
+          if (group === 'dpi' && outcome !== 'notSent') dpiTaken(target.usbId);
+        },
         (e: unknown) => {
           console.error('Sending failed:', e);
-          if (sendSeq.current[group] === n) setOne(group, 'notSent');
+          if (sendSeq.current[key] === n) setOne(target.id, group, 'notSent');
         },
       );
-    }, SEND_DELAY);
+    }, delay);
   };
+
+  // A device that comes back (plugged in, reachable again, or found when the app starts or the computer wakes)
+  // gets the settings it forgets. Nothing goes out while re-applying is paused.
+  useEffect(() => {
+    if (!scan || !loaded) return;
+    const here = new Set(reachable(scan).map((d) => d.id));
+    for (const id of [...reapplied.current.keys()]) if (!here.has(id)) reapplied.current.delete(id);
+    if (scan.reapplyPaused || !sendsSettings) return;
+    for (const target of comebacks(scan, reapplied.current)) {
+      reapplied.current.set(target.id, target.instance);
+      const current = latest.current;
+      if (!current) continue;
+      for (const group of reapplyGroups(deviceSettings(current, target.usbId))) send(target, group, REAPPLY_DELAY);
+    }
+    // `send` reads the values when it fires, so only a new scan needs to run this again.
+  }, [scan, loaded, sendsSettings]);
 
   /** Changes a setting group of the selected device; from then on the app manages that group. */
   const touch = (group: SettingGroup, change: (d: DeviceSettings) => DeviceSettings) => {
     update((s) => {
       const next = change(deviceSettings(s, usbId));
-      return withDevice(s, usbId, { ...next, managed: { ...next.managed, [group]: true } });
+      return withDevice(s, usbId, {
+        ...next,
+        managed: { ...next.managed, [group]: true },
+        dpiPending: group === 'dpi' || next.dpiPending,
+      });
     });
-    if (!paused) send(group, selected.summary.id);
+    if (!paused) send(selected.summary, group);
   };
 
   const setDpi = (next: DpiState) => {
@@ -289,7 +342,7 @@ export function useTune(backend: Backend) {
   };
 
   const stopManaging = () => {
-    cancelSends();
+    cancelSends(selected.summary.id);
     update((s) => withDevice(s, usbId, { ...deviceSettings(s, usbId), managed: allManaged(false) }));
   };
 
@@ -297,7 +350,8 @@ export function useTune(backend: Backend) {
   const applyScenario = async (scenario: Scenario) => {
     await backend.setMockScenario(scenario);
     cancelSends();
-    setGroupStatus(allStatus(sendsSettings ? 'ok' : 'notSent'));
+    setStatuses({});
+    reapplied.current.clear();
     setToast(null);
     setPerm('idle');
     setManualOpen(false);
@@ -305,7 +359,11 @@ export function useTune(backend: Backend) {
     setGuardHidden(false);
     setDpiSelected(null);
     update((s) => ({
-      ...withDevice(s, RIVAL_USB_ID, { ...deviceSettings(s, RIVAL_USB_ID), managed: allManaged(scenario !== 'own') }),
+      ...withDevice(s, RIVAL_USB_ID, {
+        ...deviceSettings(s, RIVAL_USB_ID),
+        managed: allManaged(scenario !== 'own'),
+        dpiPending: false,
+      }),
       firstRunDone: scenario !== 'setup',
     }));
     if (scenario === 'setup') setFirstRunStep('welcome');
@@ -378,9 +436,9 @@ export function useTune(backend: Backend) {
       console.error('Resuming failed:', e);
     }
     setGuardHidden(false);
-    const report = await rescan();
-    if (report?.reapplyPaused) return;
-    for (const group of SETTING_GROUPS) if (device.managed[group]) send(group, selected.summary.id);
+    // Every reachable device counts as come back, so the next scan sends its settings again.
+    reapplied.current.clear();
+    await rescan();
   };
 
   return {

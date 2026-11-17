@@ -5,11 +5,14 @@ import { translator } from '../i18n';
 import { applyCommands, installCommands, removeCommands, shellQuote } from './commands';
 import {
   applyStatus,
+  comebacks,
   deviceEntries,
   foundKey,
   listStatus,
   needsPermission,
   needsReplug,
+  reachable,
+  reapplyGroups,
   RIVAL_CAPS,
 } from './devices';
 import { diagnostics } from './diagnostics';
@@ -184,6 +187,25 @@ describe('devices', () => {
     expect(needsReplug(report([rival], rule))).toBe(false);
     expect(needsReplug(report([keyboard], rule))).toBe(false);
     expect(needsReplug(report([], rule))).toBe(false);
+  });
+
+  it('send colour and polling rate again on a comeback, and DPI only while the mouse lacks the latest stages', () => {
+    const managed = { ...defaultDeviceSettings(), managed: { dpi: true, rate: true, light: true } };
+    expect(reapplyGroups(managed)).toEqual(['rate', 'light']);
+    expect(reapplyGroups({ ...managed, dpiPending: true })).toEqual(['dpi', 'rate', 'light']);
+    expect(reapplyGroups({ ...managed, managed: { dpi: true, rate: false, light: true }, dpiPending: true })).toEqual([
+      'dpi',
+      'light',
+    ]);
+    expect(reapplyGroups({ ...defaultDeviceSettings(), dpiPending: true })).toEqual([]);
+  });
+
+  it('find the reachable devices on a plug-in that has not had its settings', () => {
+    const scan = report([rival, keyboard, { ...rival, id: '1038:1870/B', access: 'denied' }]);
+    expect(reachable(scan).map((d) => d.id)).toEqual(['1038:1870']);
+    expect(comebacks(scan, new Map()).map((d) => d.id)).toEqual(['1038:1870']);
+    expect(comebacks(scan, new Map([['1038:1870', 'first plug-in']]))).toEqual([]);
+    expect(comebacks(scan, new Map([['1038:1870', 'an earlier plug-in']])).map((d) => d.id)).toEqual(['1038:1870']);
   });
 
   it('show the apply status', () => {

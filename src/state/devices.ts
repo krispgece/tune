@@ -1,4 +1,4 @@
-import type { DeviceSummary, MouseCaps, ScanReport } from '../backend/types';
+import type { DeviceSettings, DeviceSummary, MouseCaps, ScanReport, SettingGroup } from '../backend/types';
 import type { StringKey } from '../i18n';
 
 /** A device in the list. The supported mouse stays listed while it is unplugged (`present: false`). */
@@ -86,6 +86,28 @@ export function needsPermission(scan: ScanReport | null): boolean {
 export function needsReplug(scan: ScanReport | null): boolean {
   if (!scan?.accessRule) return false;
   return scan.devices.some((d) => d.page && d.access === 'denied');
+}
+
+/**
+ * The setting groups a device gets again when it comes back: colour and polling rate, which the mouse forgets when
+ * it's unplugged, and DPI only while the mouse hasn't taken the latest stages, since it keeps them itself.
+ */
+export function reapplyGroups(device: DeviceSettings): SettingGroup[] {
+  const groups: SettingGroup[] = [];
+  if (device.managed.dpi && device.dpiPending) groups.push('dpi');
+  if (device.managed.rate) groups.push('rate');
+  if (device.managed.light) groups.push('light');
+  return groups;
+}
+
+/** Supported devices that can be reached. */
+export function reachable(scan: ScanReport): DeviceSummary[] {
+  return scan.devices.filter((d) => d.page && d.access === 'allowed');
+}
+
+/** Reachable devices on a plug-in that hasn't got its settings yet; `reapplied` maps device ids to the last one that did. */
+export function comebacks(scan: ScanReport, reapplied: ReadonlyMap<string, string>): DeviceSummary[] {
+  return reachable(scan).filter((d) => reapplied.get(d.id) !== d.instance);
 }
 
 export type GroupStatus = 'sending' | 'ok' | 'notSent';
