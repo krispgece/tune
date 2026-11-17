@@ -18,6 +18,12 @@ Tune (working name) is a Linux desktop app for SteelSeries devices, built on the
 - **No protocol information in this repository.** No command bytes, opcodes, report layouts, captures or
   reverse-engineering notes in code comments, docs, the README, UI text or commit messages. Device communication and
   its documentation stay in ssgg. Public USB IDs (`vendor:product`) are fine.
+- **Own identity.** Tune must not resemble SteelSeries GG: no SteelSeries or GG logos, product photos or renders,
+  SteelSeries orange, or GG section names (Engine, Sonar, Moments, Prism). Product names appear only to identify
+  devices.
+- **Legal notice.** Keep the full notice in the README and on the app's About screen (English and Turkish), and the
+  short line on the first-run screen. Name no single company as the trademark owner: ownership moves within the
+  SteelSeries/GN group.
 - **English names.** Identifiers, file and folder names, ids and the words inside commands are English. Guides for
   the owner may be in Turkish.
 - **UI language.** English by default; every UI string also ships in Turkish.
