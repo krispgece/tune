@@ -1,0 +1,23 @@
+[package]
+name = "tune-core"
+description = "Device backends and settings store of the Tune desktop app (working name)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+# The device library, from the sibling checkout (branch rival3-gen2/phase0). Only `adapter.rs` uses it.
+steelseries-gg-linux = { path = "../../../steelseriesgg-rs" }
+
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1.1.6", features = ["fs"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"
+
+[lints]
+workspace = true
