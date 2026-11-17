@@ -16,6 +16,9 @@ const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, 
 
 export class BrowserMock implements Backend {
   private scenario: Scenario = 'setup';
+  /** The access rule is installed. */
+  private rule = false;
+  /** The rule has reached the mouse. */
   private access = false;
   private paused = false;
   private settings: Settings = defaultSettings();
@@ -24,7 +27,8 @@ export class BrowserMock implements Backend {
 
   private reset(scenario: Scenario) {
     this.scenario = scenario;
-    this.access = scenario !== 'setup' && scenario !== 'noperm';
+    this.rule = scenario !== 'setup' && scenario !== 'noperm';
+    this.access = this.rule && scenario !== 'replug';
     this.paused = scenario === 'guard';
   }
 
@@ -62,7 +66,7 @@ export class BrowserMock implements Backend {
     }
     return {
       devices,
-      accessRule: this.access ? `${RULE_DIR}/${RULE_FILE_NAME}` : null,
+      accessRule: this.rule ? `${RULE_DIR}/${RULE_FILE_NAME}` : null,
       reapplyPaused: this.paused,
       mockScenario: this.scenario,
     };
@@ -84,8 +88,9 @@ export class BrowserMock implements Backend {
 
   async requestAccess() {
     await wait(this.delays.access);
+    this.rule = true;
     this.access = true;
-    if (this.scenario === 'setup' || this.scenario === 'noperm') this.scenario = 'own';
+    if (this.scenario === 'setup' || this.scenario === 'noperm' || this.scenario === 'replug') this.scenario = 'own';
     return 'done' as const;
   }
 

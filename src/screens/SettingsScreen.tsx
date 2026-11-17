@@ -5,14 +5,16 @@ import type { Tune } from '../app/useTune';
 import { Commands } from '../components/Commands';
 import { Button, LanguagePicker, Segmented } from '../components/ui';
 import { removeCommands, RULE_FILE_NAME } from '../state/commands';
-import { installLines, PermMessage, Waiting } from './Access';
+import { installLines, PermMessage, ReplugHelp, Waiting } from './Access';
 
 export function SettingsScreen({ tune }: { tune: Tune }) {
   const { t } = tune.i18n;
   const [licenses, setLicenses] = useState(false);
   const installedRule = tune.scan?.accessRule ?? null;
   const fileName = tune.rule?.fileName ?? RULE_FILE_NAME;
-  const showInstall = !tune.accessAllowed && (tune.perm === 'notAvailable' || tune.perm === 'stillDenied');
+  const showInstall =
+    !tune.accessAllowed && !tune.replug && (tune.perm === 'notAvailable' || tune.perm === 'stillDenied');
+  const accessText = tune.accessAllowed ? 'accessOn' : tune.replug ? 'accessPending' : 'accessOff';
   const removeLines = removeCommands(installedRule, fileName);
   const installCommandLines = installLines(tune);
 
@@ -63,15 +65,18 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
                 strokeWidth={1.75}
                 style={{ color: tune.accessAllowed ? 'var(--ok-ink)' : 'var(--warn-ink)' }}
               />
-              <span>{t(tune.accessAllowed ? 'accessOn' : 'accessOff')}</span>
+              <span>{t(accessText)}</span>
             </p>
-            {tune.accessAllowed
-              ? installedRule && <Button onClick={() => void tune.removeAccess()}>{t('removePerm')}</Button>
-              : tune.perm !== 'waiting' && (
-                  <Button variant="primary" onClick={() => void tune.allow('app')}>
-                    {t('allow')}
-                  </Button>
-                )}
+            {installedRule ? (
+              <Button onClick={() => void tune.removeAccess()}>{t('removePerm')}</Button>
+            ) : (
+              !tune.accessAllowed &&
+              tune.perm !== 'waiting' && (
+                <Button variant="primary" onClick={() => void tune.allow('app')}>
+                  {t('allow')}
+                </Button>
+              )
+            )}
           </div>
           {!tune.accessAllowed && tune.perm === 'waiting' && (
             <div className="cell">
@@ -90,7 +95,12 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
               />
             </div>
           )}
-          {tune.accessAllowed && tune.removeHelp && (
+          {tune.replug && !tune.removeHelp && (
+            <div className="cell">
+              <ReplugHelp tune={tune} toast="settings" />
+            </div>
+          )}
+          {(tune.accessAllowed || tune.replug) && tune.removeHelp && (
             <div className="cell stack stack-12">
               <p className="small-2">{t('removeLater')}</p>
               <Commands

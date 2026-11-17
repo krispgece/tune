@@ -39,6 +39,7 @@ const SCENARIO_NAMES: Record<Scenario, StringKey> = {
   multi: 'scMulti',
   unplugged: 'scUnplugged',
   noperm: 'scNoperm',
+  replug: 'scReplug',
   guard: 'scGuard',
 };
 

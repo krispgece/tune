@@ -1,11 +1,11 @@
 // The permission pieces shared by the first run, the "needs permission" page and Settings.
-import { Info, LoaderCircle, Lock, Shield, TriangleAlert } from 'lucide-react';
+import { Info, LoaderCircle, Lock, Shield, TriangleAlert, Unplug } from 'lucide-react';
 
-import type { Place, Tune } from '../app/useTune';
+import type { Place, ToastKind, Tune } from '../app/useTune';
 import { UnpluggedArt } from '../components/art';
 import { Commands } from '../components/Commands';
 import { Button, Disclosure } from '../components/ui';
-import { installCommands, RULE_FILE_NAME } from '../state/commands';
+import { applyCommands, installCommands, RULE_FILE_NAME } from '../state/commands';
 
 export function Waiting({ tune, center }: { tune: Tune; center?: boolean }) {
   return (
@@ -64,6 +64,25 @@ export function ManualSection({ tune, place }: { tune: Tune; place: Place }) {
   );
 }
 
+/** The rule is installed but has not reached the mouse: a replug or one command applies it, and the scan notices. */
+export function ReplugHelp({ tune, toast }: { tune: Tune; toast: ToastKind }) {
+  const { t } = tune.i18n;
+  const lines = applyCommands();
+  return (
+    <div className="stack stack-12">
+      <p role="status" className="banner caution">
+        <Unplug aria-hidden size={20} strokeWidth={1.75} />
+        <span>{t('replugText')}</span>
+      </p>
+      <Commands
+        lines={lines}
+        copied={tune.toast === toast}
+        onCopy={() => void tune.copy(lines.join('\n'), toast)}
+      />
+    </div>
+  );
+}
+
 export function Unplugged({ tune }: { tune: Tune }) {
   const { t } = tune.i18n;
   return (
@@ -88,20 +107,26 @@ export function NoPermission({ tune }: { tune: Tune }) {
         <h1 id="noperm-title" className="h1">
           {t('npTitle')}
         </h1>
-        <p>{t('npText')}</p>
+        {!tune.replug && <p>{t('npText')}</p>}
       </div>
       <div className="actions stack" style={{ gap: 16 }}>
-        {tune.perm === 'waiting' ? (
-          <Waiting tune={tune} center />
+        {tune.replug ? (
+          <ReplugHelp tune={tune} toast="perm" />
         ) : (
-          <div className="row-wrap" style={{ justifyContent: 'center' }}>
-            <Button variant="primary" large icon={Shield} onClick={() => void tune.allow('app')}>
-              {t('allow')}
-            </Button>
-          </div>
+          <>
+            {tune.perm === 'waiting' ? (
+              <Waiting tune={tune} center />
+            ) : (
+              <div className="row-wrap" style={{ justifyContent: 'center' }}>
+                <Button variant="primary" large icon={Shield} onClick={() => void tune.allow('app')}>
+                  {t('allow')}
+                </Button>
+              </div>
+            )}
+            <PermMessage tune={tune} />
+            <ManualSection tune={tune} place="app" />
+          </>
         )}
-        <PermMessage tune={tune} />
-        <ManualSection tune={tune} place="app" />
       </div>
     </section>
   );

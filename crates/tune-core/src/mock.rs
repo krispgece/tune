@@ -20,15 +20,20 @@ const APPLY_DELAY: Duration = Duration::from_millis(300);
 #[derive(Debug)]
 struct MockState {
     scenario: Scenario,
+    /// The access rule is installed.
+    rule: bool,
+    /// The rule has reached the mouse.
     access: bool,
     paused: bool,
 }
 
 impl MockState {
     fn for_scenario(scenario: Scenario) -> Self {
+        let rule = !matches!(scenario, Scenario::Setup | Scenario::NoPermission);
         Self {
             scenario,
-            access: !matches!(scenario, Scenario::Setup | Scenario::NoPermission),
+            rule,
+            access: rule && scenario != Scenario::Replug,
             paused: scenario == Scenario::Guard,
         }
     }
@@ -110,7 +115,7 @@ impl Backend for MockBackend {
         sort_devices(&mut devices);
         Ok(ScanReport {
             devices,
-            access_rule: state.access.then(|| format!("{}/{RULE_FILE_NAME}", RULE_DIRS[0])),
+            access_rule: state.rule.then(|| format!("{}/{RULE_FILE_NAME}", RULE_DIRS[0])),
             reapply_paused: state.paused,
             mock_scenario: Some(state.scenario),
         })
@@ -128,8 +133,12 @@ impl Backend for MockBackend {
     fn request_access(&self) -> ActionOutcome {
         self.wait(ACCESS_DELAY);
         let mut state = self.state();
+        state.rule = true;
         state.access = true;
-        if matches!(state.scenario, Scenario::Setup | Scenario::NoPermission) {
+        if matches!(
+            state.scenario,
+            Scenario::Setup | Scenario::NoPermission | Scenario::Replug
+        ) {
             state.scenario = Scenario::Own;
         }
         ActionOutcome::Done
@@ -243,6 +252,11 @@ mod tests {
         let noperm = mock.scan()?;
         assert_eq!(noperm.devices[0].access, DeviceAccess::Denied);
         assert_eq!(noperm.access_rule, None);
+
+        mock.set_mock_scenario(Scenario::Replug)?;
+        let replug = mock.scan()?;
+        assert_eq!(replug.devices[0].access, DeviceAccess::Denied);
+        assert!(replug.access_rule.is_some());
 
         mock.set_mock_scenario(Scenario::Guard)?;
         let guard = mock.scan()?;

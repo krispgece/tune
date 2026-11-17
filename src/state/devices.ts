@@ -67,12 +67,24 @@ export function foundKey(summary: DeviceSummary): StringKey {
   return summary.access === 'denied' ? 'foundNeedsPerm' : 'foundReady';
 }
 
-/** The permission step is skipped when the rule is in place or the mouse can already be reached. */
+/**
+ * The permission step is skipped when the mouse can already be reached, or when no mouse is plugged in and the rule
+ * is in place.
+ */
 export function needsPermission(scan: ScanReport | null): boolean {
   if (!scan) return true;
-  if (scan.accessRule) return false;
   const pages = scan.devices.filter((d) => d.page);
-  return pages.length === 0 || pages.some((d) => d.access === 'denied');
+  if (pages.some((d) => d.access === 'denied')) return true;
+  return pages.length === 0 && !scan.accessRule;
+}
+
+/**
+ * The rule is installed but the plugged-in mouse is still denied: the rule reaches a mouse only when it is plugged in
+ * again or udev applies its rules to the devices already plugged in.
+ */
+export function needsReplug(scan: ScanReport | null): boolean {
+  if (!scan?.accessRule) return false;
+  return scan.devices.some((d) => d.page && d.access === 'denied');
 }
 
 export type GroupStatus = 'sending' | 'ok' | 'notSent';

@@ -5,7 +5,7 @@ import type { FirstRunStep, Tune } from '../app/useTune';
 import { Logo } from '../components/art';
 import { Button, CheckList, DeviceIcon, LanguagePicker, Note } from '../components/ui';
 import { connectionKey, foundKey, needsPermission } from '../state/devices';
-import { ManualSection, PermMessage, Waiting } from './Access';
+import { ManualSection, PermMessage, ReplugHelp, Waiting } from './Access';
 
 const STEPS: FirstRunStep[] = ['welcome', 'scan', 'perm', 'ready'];
 /** The search shows for at least this long, so the step doesn't flash past. */
@@ -176,27 +176,41 @@ function PermissionStep({ tune }: { tune: Tune }) {
         </h2>
         <CheckList labelledBy="perm-what" items={[t('perm1'), t('perm2'), t('perm3'), t('perm4')]} />
       </div>
-      {tune.perm === 'waiting' ? (
-        <Waiting tune={tune} />
-      ) : (
-        <div className="stack">
+      {tune.replug ? (
+        <>
+          <ReplugHelp tune={tune} toast="perm" />
           <div className="row-wrap spread">
             <Button icon={ArrowLeft} onClick={() => tune.setFirstRunStep('scan')}>
               {t('back')}
             </Button>
-            <div className="row-wrap">
-              <Button onClick={() => void tune.finishFirstRun('noperm')}>{t('notNow')}</Button>
-              <Button variant="primary" large icon={Shield} onClick={() => void tune.allow('firstRun')}>
-                {t('allow')}
-              </Button>
-            </div>
+            <Button onClick={() => void tune.finishFirstRun('noperm')}>{t('notNow')}</Button>
           </div>
-          <Note icon={Lock}>{t('pwNote')}</Note>
-        </div>
+        </>
+      ) : (
+        <>
+          {tune.perm === 'waiting' ? (
+            <Waiting tune={tune} />
+          ) : (
+            <div className="stack">
+              <div className="row-wrap spread">
+                <Button icon={ArrowLeft} onClick={() => tune.setFirstRunStep('scan')}>
+                  {t('back')}
+                </Button>
+                <div className="row-wrap">
+                  <Button onClick={() => void tune.finishFirstRun('noperm')}>{t('notNow')}</Button>
+                  <Button variant="primary" large icon={Shield} onClick={() => void tune.allow('firstRun')}>
+                    {t('allow')}
+                  </Button>
+                </div>
+              </div>
+              <Note icon={Lock}>{t('pwNote')}</Note>
+            </div>
+          )}
+          <PermMessage tune={tune} />
+          <ManualSection tune={tune} place="firstRun" />
+          <p className="caption">{t('pkgNote')}</p>
+        </>
       )}
-      <PermMessage tune={tune} />
-      <ManualSection tune={tune} place="firstRun" />
-      <p className="caption">{t('pkgNote')}</p>
     </div>
   );
 }

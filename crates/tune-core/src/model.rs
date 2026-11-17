@@ -80,6 +80,9 @@ pub enum Scenario {
     Unplugged,
     #[serde(rename = "noperm")]
     NoPermission,
+    /// The access rule is installed, but it has not reached the mouse yet: that takes plugging the mouse in again
+    /// or asking udev to apply its rules to the devices already plugged in.
+    Replug,
     /// Re-applying stopped after the mouse disconnected twice in a short time.
     Guard,
 }
@@ -177,6 +180,7 @@ mod tests {
     #[test]
     fn wire_names_match_the_frontend() -> std::result::Result<(), serde_json::Error> {
         assert_eq!(serde_json::to_string(&Scenario::NoPermission)?, "\"noperm\"");
+        assert_eq!(serde_json::to_string(&Scenario::Replug)?, "\"replug\"");
         assert_eq!(serde_json::to_string(&DevicePage::Rival3Gen2)?, "\"rival3Gen2\"");
         assert_eq!(serde_json::to_string(&ApplyOutcome::NotSent)?, "\"notSent\"");
         let report = ScanReport::default();

@@ -21,7 +21,14 @@ import { translator } from '../i18n';
 import { normalizeHex } from '../theme/color';
 import { cssVariables, tokens, type Mode } from '../theme/tokens';
 import { copyText } from '../state/clipboard';
-import { deviceEntries, needsPermission, RIVAL_USB_ID, type DeviceEntry, type GroupStatus } from '../state/devices';
+import {
+  deviceEntries,
+  needsPermission,
+  needsReplug,
+  RIVAL_USB_ID,
+  type DeviceEntry,
+  type GroupStatus,
+} from '../state/devices';
 import type { DpiState } from '../state/dpi';
 import { allManaged, defaultDeviceSettings, defaultSettings, deviceSettings, withDevice } from '../state/settings';
 
@@ -194,6 +201,18 @@ export function useTune(backend: Backend) {
   else if (!selected.present) view = 'unplugged';
   else if (selected.summary.access === 'denied') view = 'noperm';
   else view = 'device';
+
+  const replug = needsReplug(scan);
+  const firstRunOpen = settings ? !settings.firstRunDone : false;
+  const mouseReachable = Boolean(presentPage) && accessAllowed;
+
+  // The permission step moves on by itself once the mouse can be reached, as after a replug.
+  useEffect(() => {
+    if (!firstRunOpen || firstRunStep !== 'perm' || perm === 'waiting' || !mouseReachable) return;
+    setPerm('idle');
+    setManualOpen(false);
+    setFirstRunStep('ready');
+  }, [firstRunOpen, firstRunStep, perm, mouseReachable]);
 
   const showToast = (kind: ToastKind) => {
     setToast(kind);
@@ -374,6 +393,7 @@ export function useTune(backend: Backend) {
     isMock,
     sendsSettings,
     accessAllowed,
+    replug,
     view,
     screen,
     groupStatus,

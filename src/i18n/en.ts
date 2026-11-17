@@ -16,6 +16,7 @@ export const en = {
   scMulti: 'Several devices',
   scUnplugged: 'Mouse not plugged in',
   scNoperm: 'No permission',
+  scReplug: 'Permission not active yet',
   scGuard: 'Protection on',
 
   // Side bar
@@ -184,11 +185,12 @@ export const en = {
   accessTitle: 'Device access',
   accessOn: 'Allowed: {app} can change the settings of supported devices.',
   accessOff: "Not allowed: {app} can show your devices but can't change their settings.",
+  accessPending: "Not active yet: the permission is installed but hasn't reached the mouse.",
   removePerm: 'Remove permission',
   allow: 'Allow…',
   allowLater: 'Installing the permission from here comes in a later version. For now, use the terminal commands.',
   removeLater:
-    'Removing the permission from here comes in a later version. To remove it now, run these commands in a terminal:',
+    'Removing the permission from here comes in a later version. To remove it now, run these commands in a terminal. The mouse keeps the permission until you unplug it.',
   privacy: 'Privacy',
   privacyText: "Doesn't connect to the internet or send any data.",
 
@@ -218,11 +220,13 @@ export const en = {
     'Changing settings needs a one-time permission. Your system asks for your password in its own window; {app} never sees it.',
   waiting: "Waiting for your system's password window…",
   manual: "I'll do it myself in a terminal",
-  manualText: 'Run these two commands, then unplug the mouse and plug it back in.',
+  manualText: 'Run these commands. The last one also applies the permission to a mouse that is already plugged in.',
   cmdLabel: 'Terminal commands',
   copy: 'Copy',
   checkAgain: 'Check again',
-  stillNoPerm: 'Still not allowed. Run the commands, then unplug the mouse and plug it back in.',
+  stillNoPerm: "Still not allowed: the permission isn't installed yet. Run the commands below.",
+  replugText:
+    "The permission is installed, but it hasn't reached the mouse yet. Unplug the mouse and plug it back in, or run the command below. {app} notices the change by itself.",
   noSudo: 'Never run {app} with sudo.',
 
   // First run

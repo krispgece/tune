@@ -18,6 +18,7 @@ export const tr: Strings = {
   scMulti: 'Birden çok cihaz',
   scUnplugged: 'Fare takılı değil',
   scNoperm: 'İzin yok',
+  scReplug: 'İzin henüz etkin değil',
   scGuard: 'Koruma devrede',
 
   // Side bar
@@ -187,11 +188,12 @@ export const tr: Strings = {
   accessTitle: 'Cihaz erişimi',
   accessOn: 'İzin var: {app} desteklenen cihazların ayarlarını değiştirebilir.',
   accessOff: 'İzin yok: {app} cihazlarını gösterir ama ayarlarını değiştiremez.',
+  accessPending: 'Henüz etkin değil: izin kurulu ama fareye ulaşmadı.',
   removePerm: 'İzni kaldır',
   allow: 'İzin ver…',
   allowLater: 'İzni buradan kurmak sonraki bir sürümde gelecek. Şimdilik terminal komutlarını kullan.',
   removeLater:
-    'İzni buradan kaldırmak sonraki bir sürümde gelecek. Şimdi kaldırmak için bu komutları terminalde çalıştır:',
+    'İzni buradan kaldırmak sonraki bir sürümde gelecek. Şimdi kaldırmak için bu komutları terminalde çalıştır. Fare, çıkarılıp yeniden takılana kadar izni korur.',
   privacy: 'Gizlilik',
   privacyText: 'İnternete bağlanmaz, veri göndermez.',
 
@@ -221,11 +223,13 @@ export const tr: Strings = {
     'Ayarları değiştirmek için bir kerelik izin gerekiyor. Şifreni sistem kendi penceresinde sorar; {app} şifreni görmez.',
   waiting: 'Sistemin şifre penceresi bekleniyor…',
   manual: 'Terminalde kendim yapacağım',
-  manualText: 'Bu iki komutu çalıştır, sonra fareyi çıkarıp yeniden tak.',
+  manualText: 'Bu komutları çalıştır. Sonuncusu izni şu an takılı olan fareye de uygular.',
   cmdLabel: 'Terminal komutları',
   copy: 'Kopyala',
   checkAgain: 'Tekrar kontrol et',
-  stillNoPerm: 'Hâlâ izin yok. Komutları çalıştır, sonra fareyi çıkarıp yeniden tak.',
+  stillNoPerm: 'Hâlâ izin yok: izin henüz kurulmamış. Aşağıdaki komutları çalıştır.',
+  replugText:
+    'İzin kurulu ama fareye henüz ulaşmadı. Fareyi çıkarıp yeniden tak ya da aşağıdaki komutu çalıştır. {app} değişikliği kendisi fark eder.',
   noSudo: "{app}'u asla sudo ile çalıştırma.",
 
   // First run

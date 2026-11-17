@@ -28,7 +28,7 @@ export interface DeviceSummary {
   caps: MouseCaps | null;
 }
 
-export const SCENARIOS = ['setup', 'normal', 'own', 'multi', 'unplugged', 'noperm', 'guard'] as const;
+export const SCENARIOS = ['setup', 'normal', 'own', 'multi', 'unplugged', 'noperm', 'replug', 'guard'] as const;
 export type Scenario = (typeof SCENARIOS)[number];
 
 export interface ScanReport {

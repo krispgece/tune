@@ -48,6 +48,18 @@ describe('browser mock', () => {
     expect(await mock.apply()).toBe('received');
   });
 
+  it('has the rule installed but not yet on the mouse', async () => {
+    const mock = quick();
+    await mock.setMockScenario('replug');
+    const report = await mock.scan();
+    expect(report.devices[0]?.access).toBe('denied');
+    expect(report.accessRule).toMatch(/70-tune-rival3-gen2\.rules$/);
+    expect(await mock.requestAccess()).toBe('done');
+    const after = await mock.scan();
+    expect(after.mockScenario).toBe('own');
+    expect(after.devices[0]?.access).toBe('allowed');
+  });
+
   it('removes access', async () => {
     const mock = quick();
     await mock.setMockScenario('normal');
@@ -55,6 +67,7 @@ describe('browser mock', () => {
     const report = await mock.scan();
     expect(report.mockScenario).toBe('noperm');
     expect(report.devices[0]?.access).toBe('denied');
+    expect(report.accessRule).toBeNull();
   });
 
   it('keeps saved settings apart from the caller', async () => {

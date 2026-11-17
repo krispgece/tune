@@ -2,8 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import type { AppInfo, DeviceSummary, ScanReport } from '../backend/types';
 import { translator } from '../i18n';
-import { installCommands, removeCommands, shellQuote } from './commands';
-import { applyStatus, deviceEntries, foundKey, listStatus, needsPermission, RIVAL_CAPS } from './devices';
+import { applyCommands, installCommands, removeCommands, shellQuote } from './commands';
+import {
+  applyStatus,
+  deviceEntries,
+  foundKey,
+  listStatus,
+  needsPermission,
+  needsReplug,
+  RIVAL_CAPS,
+} from './devices';
 import { diagnostics } from './diagnostics';
 import { addStage, clampDpi, deleteStage, makeStart, quickPicks, setSelectedDpi, sliderFraction } from './dpi';
 import { colorName, litZones } from './lighting';
@@ -107,17 +115,23 @@ describe('commands', () => {
     expect(shellQuote("/home/a b/it's.rules")).toBe(`'/home/a b/it'\\''s.rules'`);
   });
 
-  it('install the bundled rule by name and reload', () => {
+  it('install the bundled rule by name, reload and apply it to the plugged-in mouse', () => {
     expect(installCommands({ fileName: '70-x.rules', source: '/opt/app/udev/70-x.rules' })).toEqual([
       'sudo install -m 0644 /opt/app/udev/70-x.rules /etc/udev/rules.d/70-x.rules',
       'sudo udevadm control --reload-rules',
+      'sudo udevadm trigger --subsystem-match=hidraw',
     ]);
     expect(installCommands({ fileName: '70-x.rules', source: null })[0]).toBe(
       'sudo install -m 0644 70-x.rules /etc/udev/rules.d/70-x.rules',
     );
   });
 
+  it('apply an installed rule without a replug', () => {
+    expect(applyCommands()).toEqual(['sudo udevadm trigger --subsystem-match=hidraw']);
+  });
+
   it('remove the installed rule', () => {
+    expect(removeCommands(null, '70-x.rules')).toHaveLength(2);
     expect(removeCommands(null, '70-x.rules')[0]).toBe('sudo rm /etc/udev/rules.d/70-x.rules');
     expect(removeCommands('/usr/lib/udev/rules.d/70-x.rules', '70-x.rules')[0]).toBe(
       'sudo rm /usr/lib/udev/rules.d/70-x.rules',
@@ -151,12 +165,24 @@ describe('devices', () => {
   });
 
   it('skip the permission step only when access is in place', () => {
+    const rule = '/etc/udev/rules.d/70-x.rules';
     expect(needsPermission(null)).toBe(true);
     expect(needsPermission(report([]))).toBe(true);
     expect(needsPermission(report([keyboard]))).toBe(true);
     expect(needsPermission(report([{ ...rival, access: 'denied' }]))).toBe(true);
     expect(needsPermission(report([rival]))).toBe(false);
-    expect(needsPermission(report([], '/etc/udev/rules.d/70-x.rules'))).toBe(false);
+    expect(needsPermission(report([], rule))).toBe(false);
+    expect(needsPermission(report([{ ...rival, access: 'denied' }], rule))).toBe(true);
+  });
+
+  it('tell an installed rule that has not reached the mouse', () => {
+    const rule = '/etc/udev/rules.d/70-x.rules';
+    expect(needsReplug(null)).toBe(false);
+    expect(needsReplug(report([{ ...rival, access: 'denied' }]))).toBe(false);
+    expect(needsReplug(report([{ ...rival, access: 'denied' }], rule))).toBe(true);
+    expect(needsReplug(report([rival], rule))).toBe(false);
+    expect(needsReplug(report([keyboard], rule))).toBe(false);
+    expect(needsReplug(report([], rule))).toBe(false);
   });
 
   it('show the apply status', () => {
