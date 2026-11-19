@@ -62,7 +62,7 @@ export const en = {
   hVerified: 'the mouse reported the polling rate back, and it matches.',
   hStored: 'the mouse keeps its DPI stages itself; {app} sends them only when you change them.',
   hWaiting: "{app} hasn't sent these stages to the mouse, so it may still have others; they go out when you change them.",
-  hFailed: "{app} couldn't reach the mouse. It tries again the next time the mouse is plugged in.",
+  hFailed: "{app} couldn't reach the mouse. It tries again the next time it starts and, while it's open, each time the mouse is plugged in.",
   hOwn: "{app} isn't managing this setting; the mouse's own value applies.",
   hPaused: 'protection is on; nothing is being sent.',
   hNotSent: 'sending is off in this version until the hardware test confirms it; your choice is kept on this computer.',
