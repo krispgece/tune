@@ -7,6 +7,7 @@ import {
   applyStatus,
   comebacks,
   deviceEntries,
+  dpiSyncAfter,
   foundKey,
   listStatus,
   needsPermission,
@@ -190,15 +191,23 @@ describe('devices', () => {
     expect(needsReplug(report([], rule))).toBe(false);
   });
 
-  it('send colour and polling rate again on a comeback, and DPI only while the mouse lacks the latest stages', () => {
+  it('send colour and polling rate again on a comeback, and DPI only while a change is unconfirmed', () => {
     const managed = { ...defaultDeviceSettings(), managed: { dpi: true, rate: true, light: true } };
     expect(reapplyGroups(managed)).toEqual(['rate', 'light']);
-    expect(reapplyGroups({ ...managed, dpiPending: true })).toEqual(['dpi', 'rate', 'light']);
-    expect(reapplyGroups({ ...managed, managed: { dpi: true, rate: false, light: true }, dpiPending: true })).toEqual([
-      'dpi',
-      'light',
-    ]);
-    expect(reapplyGroups({ ...defaultDeviceSettings(), dpiPending: true })).toEqual([]);
+    expect(reapplyGroups({ ...managed, dpiSync: 'onMouse' })).toEqual(['rate', 'light']);
+    expect(reapplyGroups({ ...managed, dpiSync: 'pending' })).toEqual(['dpi', 'rate', 'light']);
+    expect(
+      reapplyGroups({ ...managed, managed: { dpi: true, rate: false, light: true }, dpiSync: 'pending' }),
+    ).toEqual(['dpi', 'light']);
+    expect(reapplyGroups({ ...defaultDeviceSettings(), dpiSync: 'pending' })).toEqual([]);
+  });
+
+  it('put DPI stages on the mouse only when the mouse confirms them', () => {
+    expect(dpiSyncAfter('pending', 'echoed')).toBe('onMouse');
+    expect(dpiSyncAfter('pending', 'sent')).toBe('pending');
+    expect(dpiSyncAfter('pending', 'notSent')).toBe('pending');
+    expect(dpiSyncAfter('unknown', 'sent')).toBe('unknown');
+    expect(dpiSyncAfter('onMouse', 'echoed')).toBe('onMouse');
   });
 
   it('find the reachable devices on a plug-in that has not had its settings', () => {
@@ -219,11 +228,13 @@ describe('devices', () => {
     expect(applyStatus('light', managed, false, 'notSent')).toBe('notSent');
   });
 
-  it('show DPI stages the mouse already has as stored on it until something is sent', () => {
+  it('show DPI stages as stored on the mouse only once the mouse confirmed them', () => {
     const managed = { ...defaultDeviceSettings(), managed: { dpi: true, rate: true, light: true } };
-    expect(applyStatus('dpi', managed, false, 'idle')).toBe('stored');
-    expect(applyStatus('dpi', { ...managed, dpiPending: true }, false, 'idle')).toBe('waiting');
-    expect(applyStatus('dpi', managed, false, 'echoed')).toBe('echoed');
+    expect(applyStatus('dpi', { ...managed, dpiSync: 'onMouse' }, false, 'idle')).toBe('stored');
+    // Stages Tune never sent, such as a file from before it could send, may not be the mouse's.
+    expect(applyStatus('dpi', managed, false, 'idle')).toBe('waiting');
+    expect(applyStatus('dpi', { ...managed, dpiSync: 'pending' }, false, 'idle')).toBe('waiting');
+    expect(applyStatus('dpi', { ...managed, dpiSync: 'onMouse' }, false, 'echoed')).toBe('echoed');
     expect(applyStatus('rate', managed, false, 'idle')).toBe('waiting');
   });
 });

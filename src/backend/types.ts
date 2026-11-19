@@ -65,6 +65,13 @@ export interface Zones {
   rear: string;
 }
 
+/**
+ * Where the DPI stages kept here stand with the mouse, which stores its stages itself and can't report them:
+ * `unknown` when Tune hasn't sent them (never changed, or changed before Tune could send), `pending` when they changed
+ * and the mouse hasn't confirmed them yet, `onMouse` once it has.
+ */
+export type DpiSync = 'unknown' | 'pending' | 'onMouse';
+
 export interface DeviceSettings {
   managed: Managed;
   dpiStages: number[];
@@ -73,8 +80,8 @@ export interface DeviceSettings {
   lightMode: LightMode;
   color: string;
   zones: Zones;
-  /** The DPI stages changed and the mouse hasn't taken them yet; the mouse keeps its DPI stages itself. */
-  dpiPending: boolean;
+  /** Where the DPI stages stand with the mouse; they go out again on a comeback only while pending. */
+  dpiSync: DpiSync;
 }
 
 export interface Settings {

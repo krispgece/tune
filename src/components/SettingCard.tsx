@@ -10,7 +10,7 @@ export function helpItems({ t }: Translator, group: SettingGroup, sendsSettings:
   const pairs: [StringKey, StringKey][] = [['stSending', 'hSending']];
   if (group === 'rate') pairs.push(['stVerified', 'hVerified']);
   pairs.push(['stEchoed', 'hEchoed'], ['stSent', 'hSent']);
-  if (group === 'dpi') pairs.push(['stStored', 'hStored']);
+  if (group === 'dpi') pairs.push(['stStored', 'hStored'], ['stWaiting', 'hWaiting']);
   pairs.push(['stFailed', 'hFailed'], ['stOwn', 'hOwn'], ['stPaused', 'hPaused']);
   if (!sendsSettings) pairs.push(['stNotSent', 'hNotSent']);
   return pairs.map(([term, desc]) => [t(term), t(desc)]);

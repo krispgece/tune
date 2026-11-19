@@ -1,4 +1,12 @@
-import type { DeviceSettings, DeviceSummary, MouseCaps, ScanReport, SettingGroup } from '../backend/types';
+import type {
+  ApplyOutcome,
+  DeviceSettings,
+  DeviceSummary,
+  DpiSync,
+  MouseCaps,
+  ScanReport,
+  SettingGroup,
+} from '../backend/types';
 import type { StringKey } from '../i18n';
 
 /** A device in the list. The supported mouse stays listed while it is unplugged (`present: false`). */
@@ -90,11 +98,11 @@ export function needsReplug(scan: ScanReport | null): boolean {
 
 /**
  * The setting groups a device gets again when it comes back: colour and polling rate, which the mouse forgets when
- * it's unplugged, and DPI only while the mouse hasn't taken the latest stages, since it keeps them itself.
+ * it's unplugged, and DPI only while a change hasn't been confirmed, since the mouse keeps its stages itself.
  */
 export function reapplyGroups(device: DeviceSettings): SettingGroup[] {
   const groups: SettingGroup[] = [];
-  if (device.managed.dpi && device.dpiPending) groups.push('dpi');
+  if (device.managed.dpi && device.dpiSync === 'pending') groups.push('dpi');
   if (device.managed.rate) groups.push('rate');
   if (device.managed.light) groups.push('light');
   return groups;
@@ -118,9 +126,14 @@ export function comebacks(scan: ScanReport, reapplied: ReadonlyMap<string, strin
 export type GroupStatus = 'idle' | 'sending' | 'sent' | 'echoed' | 'verified' | 'notSent' | 'failed';
 export type ApplyStatus = Exclude<GroupStatus, 'idle'> | 'own' | 'paused' | 'stored' | 'waiting';
 
+/** What a DPI send's answer means for the stages kept here: only the mouse's confirmation puts them on the mouse. */
+export function dpiSyncAfter(sync: DpiSync, outcome: ApplyOutcome): DpiSync {
+  return outcome === 'echoed' || outcome === 'verified' ? 'onMouse' : sync;
+}
+
 /**
- * The status a setting card shows. Before anything is sent in this session, DPI stages the mouse has taken show as
- * stored on the mouse, which keeps them itself.
+ * The status a setting card shows. Before anything is sent in this session, DPI stages the mouse confirmed earlier
+ * show as stored on the mouse, which keeps them itself.
  */
 export function applyStatus(
   group: SettingGroup,
@@ -131,5 +144,5 @@ export function applyStatus(
   if (!device.managed[group]) return 'own';
   if (paused) return 'paused';
   if (status !== 'idle') return status;
-  return group === 'dpi' && !device.dpiPending ? 'stored' : 'waiting';
+  return group === 'dpi' && device.dpiSync === 'onMouse' ? 'stored' : 'waiting';
 }

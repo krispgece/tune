@@ -61,6 +61,7 @@ export const en = {
   hSent: "the setting went out, but the mouse didn't answer.",
   hVerified: 'the mouse reported the polling rate back, and it matches.',
   hStored: 'the mouse keeps its DPI stages itself; {app} sends them only when you change them.',
+  hWaiting: "{app} hasn't sent these stages to the mouse, so it may still have others; they go out when you change them.",
   hFailed: "{app} couldn't reach the mouse. It tries again the next time the mouse is plugged in.",
   hOwn: "{app} isn't managing this setting; the mouse's own value applies.",
   hPaused: 'protection is on; nothing is being sent.',
@@ -83,7 +84,7 @@ export const en = {
   delStage: 'Delete stage',
   dpiNote: "The mouse's DPI button cycles through these stages.",
   dpiStored:
-    "The mouse stores these stages itself and keeps them when it's unplugged; it starts again on the stage it was last on. {app} sends them only when you change them, and the mouse then switches to the start stage.",
+    "The mouse stores its DPI stages itself and keeps them when it's unplugged; it starts again on the stage it was last on. {app} sends the stages only when you change them, and the mouse then switches to the start stage.",
   dpiSuggest: "{app} can't read the mouse's current settings, so the values start as suggestions.",
 
   // Polling rate

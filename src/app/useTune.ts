@@ -25,6 +25,7 @@ import { copyText } from '../state/clipboard';
 import {
   comebacks,
   deviceEntries,
+  dpiSyncAfter,
   needsPermission,
   needsReplug,
   reachable,
@@ -248,6 +249,15 @@ export function useTune(backend: Backend) {
   const setOne = (deviceId: string, group: SettingGroup, status: GroupStatus) =>
     setStatuses((prev) => ({ ...prev, [deviceId]: { ...prev[deviceId], [group]: status } }));
 
+  /** Makes the earlier sends of one group to one device stale: a waiting one is dropped, an answer is ignored. */
+  const supersede = (deviceId: string, group: SettingGroup): number => {
+    const key = sendKey(deviceId, group);
+    const n = (sendSeq.current[key] ?? 0) + 1;
+    sendSeq.current[key] = n;
+    window.clearTimeout(sendTimers.current[key]);
+    return n;
+  };
+
   /** Drops the sends that haven't finished, for one device or for all; their answers are ignored. */
   const cancelSends = (deviceId?: string) => {
     for (const key of Object.keys(sendSeq.current)) {
@@ -257,19 +267,22 @@ export function useTune(backend: Backend) {
     }
   };
 
-  /** The mouse has taken the DPI stages it was sent, so they need not go out again when it comes back. */
-  const dpiTaken = (usb: string) => {
+  /**
+   * Records what the mouse answered to the DPI stages it was sent. An answer that is still current belongs to the
+   * stages kept here: every DPI change makes the sends before it stale.
+   */
+  const dpiAnswered = (usb: string, outcome: ApplyOutcome) => {
     const current = latest.current;
-    if (current && deviceSettings(current, usb).dpiPending)
-      update((s) => withDevice(s, usb, { ...deviceSettings(s, usb), dpiPending: false }));
+    if (!current) return;
+    const device = deviceSettings(current, usb);
+    const sync = dpiSyncAfter(device.dpiSync, outcome);
+    if (sync !== device.dpiSync) update((s) => withDevice(s, usb, { ...deviceSettings(s, usb), dpiSync: sync }));
   };
 
   /** Sends one setting group with the values it has when the wait is over; a newer send of it replaces this one. */
   const send = (target: DeviceSummary, group: SettingGroup, delay = SEND_DELAY[group]) => {
     const key = sendKey(target.id, group);
-    const n = (sendSeq.current[key] ?? 0) + 1;
-    sendSeq.current[key] = n;
-    window.clearTimeout(sendTimers.current[key]);
+    const n = supersede(target.id, group);
     if (!sendsSettings) {
       setOne(target.id, group, 'notSent');
       return;
@@ -282,7 +295,7 @@ export function useTune(backend: Backend) {
         (outcome) => {
           if (sendSeq.current[key] !== n) return;
           setOne(target.id, group, OUTCOME_STATUS[outcome]);
-          if (group === 'dpi' && outcome !== 'notSent') dpiTaken(target.usbId);
+          if (group === 'dpi') dpiAnswered(target.usbId, outcome);
         },
         (e: unknown) => {
           console.error('Sending failed:', e);
@@ -317,10 +330,12 @@ export function useTune(backend: Backend) {
       return withDevice(s, usbId, {
         ...next,
         managed: { ...next.managed, [group]: true },
-        dpiPending: group === 'dpi' || next.dpiPending,
+        dpiSync: group === 'dpi' ? 'pending' : next.dpiSync,
       });
     });
-    if (!paused) send(selected.summary, group);
+    // While paused nothing goes out, but an answer still on its way belongs to the values before this change.
+    if (paused) supersede(selected.summary.id, group);
+    else send(selected.summary, group);
   };
 
   const setDpi = (next: DpiState) => {
@@ -367,7 +382,7 @@ export function useTune(backend: Backend) {
       ...withDevice(s, RIVAL_USB_ID, {
         ...deviceSettings(s, RIVAL_USB_ID),
         managed: allManaged(scenario !== 'own'),
-        dpiPending: false,
+        dpiSync: 'onMouse',
       }),
       firstRunDone: scenario !== 'setup',
     }));

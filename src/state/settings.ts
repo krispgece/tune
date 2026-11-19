@@ -14,7 +14,7 @@ export function defaultDeviceSettings(): DeviceSettings {
     lightMode: 'single',
     color: '#1fc8ff',
     zones: { ...DEFAULT_ZONES },
-    dpiPending: false,
+    dpiSync: 'unknown',
   };
 }
 

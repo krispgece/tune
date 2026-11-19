@@ -45,6 +45,21 @@ pub enum LightMode {
     Off,
 }
 
+/// Where the DPI stages kept here stand with the mouse. The mouse stores its stages itself and cannot report them,
+/// so only Tune's own sends tell.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum DpiSync {
+    /// Tune has not sent these stages, so the mouse may hold others: they were never changed, or they were changed
+    /// before Tune could send. Nothing goes out until they change.
+    #[default]
+    Unknown,
+    /// The stages changed and the mouse has not confirmed them yet; they go out again when the mouse comes back.
+    Pending,
+    /// The mouse confirmed these stages.
+    OnMouse,
+}
+
 /// Which setting groups Tune manages. A group Tune does not manage keeps the mouse's own value.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default)]
@@ -83,9 +98,9 @@ pub struct DeviceSettings {
     pub light_mode: LightMode,
     pub color: String,
     pub zones: Zones,
-    /// The DPI stages changed and the mouse has not taken them yet. The mouse keeps its DPI stages itself, so they are
-    /// sent on plug-in only while this is set; colour and polling rate are sent every time.
-    pub dpi_pending: bool,
+    /// Where the DPI stages stand with the mouse. They are sent again on plug-in only while pending; colour and
+    /// polling rate are sent every time.
+    pub dpi_sync: DpiSync,
 }
 
 impl Default for DeviceSettings {
@@ -98,7 +113,7 @@ impl Default for DeviceSettings {
             light_mode: LightMode::Single,
             color: "#1fc8ff".to_owned(),
             zones: Zones::default(),
-            dpi_pending: false,
+            dpi_sync: DpiSync::Unknown,
         }
     }
 }
@@ -303,7 +318,7 @@ mod tests {
                 front: "#f00".to_owned(),
                 ..Zones::default()
             },
-            dpi_pending: true,
+            dpi_sync: DpiSync::Pending,
         };
         settings.devices.insert("1038:1870".to_owned(), mouse);
 
@@ -329,7 +344,7 @@ mod tests {
         assert_eq!(json["theme"], "system");
         assert_eq!(json["devices"]["1038:1870"]["pollRateHz"], 1000);
         assert_eq!(json["devices"]["1038:1870"]["lightMode"], "single");
-        assert_eq!(json["devices"]["1038:1870"]["dpiPending"], false);
+        assert_eq!(json["devices"]["1038:1870"]["dpiSync"], "unknown");
         Ok(())
     }
 
@@ -348,7 +363,25 @@ mod tests {
         assert_eq!(mouse.poll_rate_hz, 250);
         assert_eq!(mouse.dpi_stages, DeviceSettings::default().dpi_stages);
         assert_eq!(mouse.managed, Managed::default());
-        assert!(!mouse.dpi_pending);
+        assert_eq!(mouse.dpi_sync, DpiSync::Unknown);
+        Ok(())
+    }
+
+    #[test]
+    fn dpi_stages_saved_before_tune_could_send_are_not_taken_as_on_the_mouse() -> TestResult {
+        let dir = tempfile::tempdir()?;
+        let path = dir.path().join("settings.json");
+        // As written by the versions that only stored settings, and by the first sending build.
+        std::fs::write(
+            &path,
+            r#"{ "version": 1, "devices": { "1038:1870": {
+                "managed": { "dpi": true, "rate": true, "light": true },
+                "dpiStages": [400, 800, 1500, 3200], "startStage": 2, "dpiPending": false } } }"#,
+        )?;
+        let mouse = &SettingsStore::file(&path).load()?.devices["1038:1870"];
+        assert!(mouse.managed.dpi);
+        assert_eq!(mouse.dpi_stages, [400, 800, 1500, 3200]);
+        assert_eq!(mouse.dpi_sync, DpiSync::Unknown);
         Ok(())
     }
 

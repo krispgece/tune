@@ -63,6 +63,7 @@ export const tr: Strings = {
   hSent: 'ayar gönderildi ama fare yanıt vermedi.',
   hVerified: 'fare rapor hızını geri bildirdi ve seçtiğinle aynı.',
   hStored: 'fare DPI kademelerini kendisi saklar; {app} onları yalnızca sen değiştirdiğinde gönderir.',
+  hWaiting: '{app} bu kademeleri fareye göndermedi, farede başka kademeler olabilir; sen değiştirdiğinde gönderilir.',
   hFailed: '{app} fareye ulaşamadı; fare yeniden takıldığında tekrar dener.',
   hOwn: '{app} bu ayarı yönetmiyor; farenin kendi değeri geçerli.',
   hPaused: 'koruma devrede, ayar gönderilmiyor.',
@@ -85,7 +86,7 @@ export const tr: Strings = {
   delStage: 'Kademeyi sil',
   dpiNote: 'Farenin DPI tuşu bu kademeler arasında geçiş yapar.',
   dpiStored:
-    'Fare bu kademeleri kendisi saklar, çıkarılınca da kaybetmez; yeniden takılınca en son kaldığı kademeden başlar. {app} onları yalnızca sen değiştirdiğinde gönderir, fare de o an başlangıç kademesine geçer.',
+    'Fare DPI kademelerini kendisi saklar, çıkarılınca da kaybetmez; yeniden takılınca en son kaldığı kademeden başlar. {app} kademeleri yalnızca sen değiştirdiğinde gönderir, fare de o an başlangıç kademesine geçer.',
   dpiSuggest: '{app} farenin şu anki ayarlarını okuyamadığı için değerler öneri olarak başlar.',
 
   // Polling rate
