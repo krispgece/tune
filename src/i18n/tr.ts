@@ -92,7 +92,7 @@ export const tr: Strings = {
   // Polling rate
   rateTitle: 'Rapor hızı',
   rateNote:
-    'Yüksek değer imleci daha akıcı yapar. Bu farede üst sınır {max} Hz. Fare çıkarılınca kendi hızına döner; {app} seninkini her takılışta yeniden gönderir.',
+    'Yüksek değer imleci daha akıcı yapar. Bu farede üst sınır {max} Hz. Fare çıkarılınca kendi hızına döner; {app} açıkken seninkini fare her takıldığında yeniden gönderir.',
 
   // Lighting
   lightColour: 'Işık rengi',
@@ -108,7 +108,7 @@ export const tr: Strings = {
   zRear: 'Arka',
   waveNote: 'Tıklayınca geçen beyaz dalga farenin kendi kayıtlı efekti; bu sürüm onu değiştirmez.',
   saveNote:
-    'Fare renkleri saklamaz: çıkarılınca kendi ışığı geri gelir. {app} renklerini fare her takıldığında, {app} açıldığında ve bilgisayar uykudan uyandığında yeniden gönderir.',
+    'Fare renkleri saklamaz: çıkarılınca kendi ışığı geri gelir. {app} renklerini açılınca gönderir; açıkken de fare her takıldığında ve bilgisayar uykudan uyandığında yeniden gönderir.',
   previewOff: 'Fare önizlemesi: ışıklar kapalı',
   previewOn: 'Fare önizlemesi: ön bölge {front}, orta bölge {middle}, arka bölge {rear}',
   shade: '{hue} tonu {hex}',
@@ -139,7 +139,7 @@ export const tr: Strings = {
   modelWired: '{name} (kablolu)',
   usbId: 'USB kimliği',
   firmware: 'Yazılım sürümü',
-  firmwareVal: 'İlk denemede okunacak',
+  firmwareVal: 'Okunmadı',
   connection: 'Bağlantı',
   connectionVal: 'USB · en fazla {max} Hz',
   access: 'Erişim izni',
@@ -153,7 +153,7 @@ export const tr: Strings = {
   groupsMany: '{n} ayar grubu',
   expTitle: 'Deneysel destek',
   expText:
-    'Bu farenin özelliklerinin çoğu henüz donanımda doğrulanmadı. Doğrulanan her özellik bir güncellemeyle rozetini kaybeder.',
+    'Bu özellikler şimdiye kadar tek bir farede denendi. Bir özellik, daha fazla denemeyle doğrulandığında bir güncellemede rozetini kaybeder.',
   copyDiag: 'Tanılama bilgisini kopyala',
   stopManaging: 'Yönetmeyi bırak',
   copied: 'Kopyalandı',
@@ -277,7 +277,7 @@ export const tr: Strings = {
   readyTitle: 'Hazırsın',
   readyText: '{device} hazır.',
   readyTextNone: '{app} hazır.',
-  ready1: 'Renk ve rapor hızı bu bilgisayarda saklanır, fare her takıldığında yeniden gönderilir.',
+  ready1: 'Renk ve rapor hızı bu bilgisayarda saklanır; {app} açıkken fare her takıldığında yeniden gönderilir.',
   ready2: 'DPI kademeleri farenin kendisinde saklanır; değişiklik fare çıkarılınca da kalır.',
   ready3: 'Başka bir SteelSeries cihazı taktığında cihaz listesinde görünür.',
   openApp: "{app}'u aç",

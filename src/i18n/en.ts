@@ -90,7 +90,7 @@ export const en = {
   // Polling rate
   rateTitle: 'Polling rate',
   rateNote:
-    "A higher value makes the pointer smoother. This mouse goes up to {max} Hz. It goes back to its own rate when it's unplugged, so {app} sends yours again each time it's plugged in.",
+    "A higher value makes the pointer smoother. This mouse goes up to {max} Hz. It goes back to its own rate when it's unplugged; while {app} is open, it sends yours again each time the mouse is plugged in.",
 
   // Lighting
   lightColour: 'Light colour',
@@ -106,7 +106,7 @@ export const en = {
   zRear: 'Rear',
   waveNote: "The white wave on click is the mouse's own stored effect; this version doesn't change it.",
   saveNote:
-    "The mouse doesn't keep colours: when it's unplugged, its own lighting comes back. {app} sends your colours again each time the mouse is plugged in, when {app} starts and when the computer wakes from sleep.",
+    "The mouse doesn't keep colours: when it's unplugged, its own lighting comes back. {app} sends your colours again when it starts and, while it's open, each time the mouse is plugged in or the computer wakes from sleep.",
   previewOff: 'Mouse preview: lights off',
   previewOn: 'Mouse preview: front zone {front}, middle zone {middle}, rear zone {rear}',
   shade: '{hue} shade {hex}',
@@ -137,7 +137,7 @@ export const en = {
   modelWired: '{name} (wired)',
   usbId: 'USB ID',
   firmware: 'Firmware',
-  firmwareVal: 'Read in the first test',
+  firmwareVal: 'Not read',
   connection: 'Connection',
   connectionVal: 'USB · up to {max} Hz',
   access: 'Access permission',
@@ -150,7 +150,7 @@ export const en = {
   groupsOne: '{n} setting group',
   groupsMany: '{n} setting groups',
   expTitle: 'Experimental support',
-  expText: "Most of this mouse's features aren't verified on hardware yet. A feature loses its badge in an update once it is.",
+  expText: 'These features have been tested on one mouse so far. A feature loses its badge in an update once more testing confirms it.',
   copyDiag: 'Copy diagnostic info',
   stopManaging: 'Stop managing',
   copied: 'Copied',
@@ -274,7 +274,7 @@ export const en = {
   readyTitle: "You're all set",
   readyText: '{device} is ready.',
   readyTextNone: '{app} is ready.',
-  ready1: 'Colour and polling rate are kept on this computer and sent again each time the mouse is plugged in.',
+  ready1: "Colour and polling rate are kept on this computer; while {app} is open, they're sent again each time the mouse is plugged in.",
   ready2: "DPI stages are stored on the mouse itself, so a change stays when it's unplugged.",
   ready3: 'Plug in another SteelSeries device and it shows up in the device list.',
   openApp: 'Open {app}',

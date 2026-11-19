@@ -15,12 +15,12 @@ tried on one mouse in the Phase 0 hardware test (`docs/`).
 - First supported device: the wired Rival 3 Gen 2. Other SteelSeries devices that ssgg recognizes show up as "Not
   supported yet", and nothing is sent to them.
 - The mouse forgets its colour and polling rate when it's unplugged, so the app keeps them on the computer and sends
-  them again whenever the mouse is plugged in, when the app starts and when the computer wakes from sleep. The mouse
-  stores its DPI stages itself, so the app sends them only when they change. The app sends no command to save
-  settings into the mouse.
+  them again when it starts and, while it's open, whenever the mouse is plugged in or the computer wakes from sleep.
+  Nothing is sent while the app is closed, and it doesn't start on its own yet. The mouse stores its DPI stages itself,
+  so the app sends them only when they change. The app sends no command to save settings into the mouse.
 - If the mouse drops off twice right after the app sent it something, the app stops sending until you try again,
   also after a restart.
-- Features keep an "Experimental" badge until they are verified on hardware.
+- Features keep an "Experimental" badge until testing beyond that one mouse confirms them.
 - The interface is in English by default and also in Turkish, with light and dark themes.
 
 ## Build and run
