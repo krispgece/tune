@@ -60,7 +60,7 @@ export const tr: Strings = {
   stNotSent: 'Gönderilmedi',
   hSending: '{app} ayarı fareye gönderiyor.',
   hEchoed: 'fare ayarı aldığını bildirdi.',
-  hSent: 'ayar gönderildi ama fare yanıt vermedi.',
+  hSent: 'ayar gönderildi ama fare aldığını onaylamadı.',
   hVerified: 'fare rapor hızını geri bildirdi ve seçtiğinle aynı.',
   hStored: 'fare DPI kademelerini kendisi saklar; {app} onları yalnızca sen değiştirdiğinde gönderir.',
   hWaiting: '{app} bu kademeleri fareye göndermedi, farede başka kademeler olabilir; sen değiştirdiğinde gönderilir.',

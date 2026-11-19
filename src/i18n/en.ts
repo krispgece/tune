@@ -58,7 +58,7 @@ export const en = {
   stNotSent: 'Not sent',
   hSending: '{app} is sending the setting to the mouse.',
   hEchoed: 'the mouse answered that it got the setting.',
-  hSent: "the setting went out, but the mouse didn't answer.",
+  hSent: "the setting went out, but the mouse didn't confirm it.",
   hVerified: 'the mouse reported the polling rate back, and it matches.',
   hStored: 'the mouse keeps its DPI stages itself; {app} sends them only when you change them.',
   hWaiting: "{app} hasn't sent these stages to the mouse, so it may still have others; they go out when you change them.",

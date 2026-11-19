@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 
 use steelseries_gg::devices::hid_reports::MouseDpiStagesCommand;
 use steelseries_gg::devices::mice::modern::{MouseModel, model_for};
-use steelseries_gg::devices::mice::{Mouse, SettingAck};
+use steelseries_gg::devices::mice::{Mouse, PollRateReadback, SettingAck};
 use steelseries_gg::devices::{DeviceInfo, DeviceManager, DeviceType, product_ids};
 use steelseries_gg::rgb::Color;
 
@@ -250,11 +250,14 @@ fn send_group(mouse: &mut dyn Mouse, group: SettingGroup, settings: &DeviceSetti
                 .map_err(|_| Error::Send(format!("{} Hz is not a polling rate", settings.poll_rate_hz)))?;
             mouse.set_poll_rate(hz).map_err(send_error)?;
             answers.extend_from_slice(mouse.last_acknowledgements());
-            // Only a read-back naming the rate just set counts; any other answer leaves the outcome to the echo.
-            if let Ok(Some(readback)) = mouse.poll_rate_readback()
-                && readback.hz == Some(hz)
-            {
-                return Ok(ApplyOutcome::Verified);
+            // A read-back naming the rate just set confirms it, and one naming another rate means the mouse did not
+            // take it. No read-back, or one naming no rate, leaves the outcome to the answer.
+            if let Ok(Some(PollRateReadback { hz: Some(read), .. })) = mouse.poll_rate_readback() {
+                return Ok(if read == hz {
+                    ApplyOutcome::Verified
+                } else {
+                    ApplyOutcome::Sent
+                });
             }
         }
         SettingGroup::Light => {
@@ -396,7 +399,6 @@ mod tests {
     use std::collections::VecDeque;
 
     use steelseries_gg::devices::Device;
-    use steelseries_gg::devices::mice::PollRateReadback;
 
     use super::*;
     use crate::settings::Zones;
@@ -734,6 +736,8 @@ mod tests {
         let (outcome, calls) = send_rate(Readback::Rate(Some(500)))?;
         assert_eq!(calls, [Call::Rate(500), Call::ReadRate]);
         assert_eq!(outcome, ApplyOutcome::Verified);
+        // The mouse answered, but it reports another rate: not confirmed.
+        assert_eq!(send_rate(Readback::Rate(Some(1000)))?.0, ApplyOutcome::Sent);
         // No read-back, one naming no rate, or a failed one leave the outcome to the answer.
         assert_eq!(send_rate(Readback::NoReply)?.0, ApplyOutcome::Echoed);
         assert_eq!(send_rate(Readback::Rate(None))?.0, ApplyOutcome::Echoed);
