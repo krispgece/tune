@@ -77,10 +77,12 @@ vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune
   run device-writing commands, `sudo` or udev changes yourself. The app on real devices (`npm run app`,
   `target/release/tune` without `--mock`) sends settings to a plugged-in mouse, so it counts as device-writing; check
   your work with `npm run app:mock` or `npm run dev`.
-- **The owner's running app.** `npm run app` rebuilds and restarts on Rust edits and takes frontend edits live, and
-  every start sends the saved settings to the mouse. Before editing `crates/`, `src-tauri/` or `src/`, check that no
-  real-backend Tune runs (`ps -eo pid,args | grep -E 'tauri dev|target/(debug|release)/tune'`); if the owner's does,
-  ask them to stop it first. `docs/` is not watched.
+- **The owner's running app.** `npm run app` rebuilds and restarts on Rust edits and takes frontend edits live; some,
+  such as `index.html`, `vite.config.ts` or `tsconfig.json`, reload the window. Every start or reload sends the saved
+  settings to the mouse. Before editing anything but Markdown files, check that no real-backend Tune runs: run
+  `pgrep -af '[t]auri dev|target/(debug|release)/[t]une'` as a command of its own, and it prints nothing then (the
+  brackets keep it from matching its own command line). If it lists a Tune you did not start, ask the owner to stop
+  it first.
 - **udev rule.** hidraw of the one settings interface only, `TAG+="uaccess"`, no `GROUP`/`MODE`, numbered below 73;
   check it with `udevadm verify`.
 - **Publishing.** No GitHub repository, push or release without the owner's explicit go-ahead.
