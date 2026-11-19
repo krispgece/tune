@@ -23,13 +23,11 @@ import { normalizeHex } from '../theme/color';
 import { cssVariables, tokens, type Mode } from '../theme/tokens';
 import { copyText } from '../state/clipboard';
 import {
-  comebacks,
   deviceEntries,
   dpiSyncAfter,
   needsPermission,
   needsReplug,
-  reachable,
-  reapplyGroups,
+  planReapply,
   RIVAL_USB_ID,
   type DeviceEntry,
   type GroupStatus,
@@ -308,18 +306,17 @@ export function useTune(backend: Backend) {
   // A device that comes back (plugged in, reachable again, or found when the app starts or the computer wakes)
   // gets the settings it forgets. Nothing goes out while re-applying is paused.
   useEffect(() => {
-    if (!scan || !loaded) return;
-    if (wakes.current !== null && scan.wakes !== wakes.current) reapplied.current.clear();
-    wakes.current = scan.wakes;
-    const here = new Set(reachable(scan).map((d) => d.id));
-    for (const id of [...reapplied.current.keys()]) if (!here.has(id)) reapplied.current.delete(id);
-    if (scan.reapplyPaused || !sendsSettings) return;
-    for (const target of comebacks(scan, reapplied.current)) {
-      reapplied.current.set(target.id, target.instance);
-      const current = latest.current;
-      if (!current) continue;
-      for (const group of reapplyGroups(deviceSettings(current, target.usbId))) send(target, group, REAPPLY_DELAY);
-    }
+    const current = latest.current;
+    if (!scan || !loaded || !current) return;
+    const plan = planReapply(
+      scan,
+      { reapplied: reapplied.current, wakes: wakes.current },
+      current,
+      sendsSettings && !scan.reapplyPaused,
+    );
+    reapplied.current = plan.memory.reapplied;
+    wakes.current = plan.memory.wakes;
+    for (const { target, groups } of plan.sends) for (const group of groups) send(target, group, REAPPLY_DELAY);
     // `send` reads the values when it fires, so only a new scan needs to run this again.
   }, [scan, loaded, sendsSettings]);
 

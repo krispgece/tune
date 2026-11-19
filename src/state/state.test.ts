@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { AppInfo, DeviceSummary, ScanReport } from '../backend/types';
+import type { AppInfo, DeviceSummary, ScanReport, Settings } from '../backend/types';
 import { translator } from '../i18n';
 import { applyCommands, installCommands, removeCommands, shellQuote } from './commands';
 import {
@@ -12,14 +12,16 @@ import {
   listStatus,
   needsPermission,
   needsReplug,
+  planReapply,
   reachable,
   reapplyGroups,
   RIVAL_CAPS,
+  RIVAL_USB_ID,
 } from './devices';
 import { diagnostics } from './diagnostics';
 import { addStage, clampDpi, deleteStage, makeStart, quickPicks, setSelectedDpi, sliderFraction } from './dpi';
 import { colorName, litZones } from './lighting';
-import { defaultDeviceSettings } from './settings';
+import { allManaged, defaultDeviceSettings, defaultSettings, withDevice } from './settings';
 
 const caps = RIVAL_CAPS;
 const en = translator('en', 'App');
@@ -236,6 +238,66 @@ describe('devices', () => {
     expect(applyStatus('dpi', { ...managed, dpiSync: 'pending' }, false, 'idle')).toBe('waiting');
     expect(applyStatus('dpi', { ...managed, dpiSync: 'onMouse' }, false, 'echoed')).toBe('echoed');
     expect(applyStatus('rate', managed, false, 'idle')).toBe('waiting');
+  });
+});
+
+describe('re-sending', () => {
+  const managed: Settings = withDevice(defaultSettings(), RIVAL_USB_ID, {
+    ...defaultDeviceSettings(),
+    managed: allManaged(true),
+  });
+  const fresh = { reapplied: new Map<string, string>(), wakes: null };
+  const scanOf = (devices: DeviceSummary[], wakes = 0): ScanReport => ({ ...report(devices), wakes });
+  const sent = (plan: ReturnType<typeof planReapply>) => plan.sends.map((s) => [s.target.id, s.groups]);
+
+  it('send colour and polling rate to each reachable supported device at the first scan', () => {
+    const denied = { ...rival, id: '1038:1870/B', access: 'denied' as const };
+    const plan = planReapply(scanOf([rival, keyboard, denied]), fresh, managed, true);
+    expect(sent(plan)).toEqual([['1038:1870', ['rate', 'light']]]);
+    expect([...plan.memory.reapplied]).toEqual([['1038:1870', 'first plug-in']]);
+    expect(plan.memory.wakes).toBe(0);
+  });
+
+  it('send nothing again on the same plug-in, and everything on a new one', () => {
+    const first = planReapply(scanOf([rival]), fresh, managed, true);
+    expect(planReapply(scanOf([rival]), first.memory, managed, true).sends).toEqual([]);
+    const replugged = planReapply(scanOf([{ ...rival, instance: 'second plug-in' }]), first.memory, managed, true);
+    expect(sent(replugged)).toEqual([['1038:1870', ['rate', 'light']]]);
+  });
+
+  it('send again after a wake from sleep, even on the same plug-in', () => {
+    const first = planReapply(scanOf([rival], 3), fresh, managed, true);
+    const woke = planReapply(scanOf([rival], 4), first.memory, managed, true);
+    expect(sent(woke)).toEqual([['1038:1870', ['rate', 'light']]]);
+    expect(woke.memory.wakes).toBe(4);
+    expect(planReapply(scanOf([rival], 4), woke.memory, managed, true).sends).toEqual([]);
+  });
+
+  it('send again to a mouse that was out of reach, even on the same plug-in', () => {
+    const first = planReapply(scanOf([rival]), fresh, managed, true);
+    const denied = planReapply(scanOf([{ ...rival, access: 'denied' }]), first.memory, managed, true);
+    expect(denied.sends).toEqual([]);
+    expect(denied.memory.reapplied.size).toBe(0);
+    expect(sent(planReapply(scanOf([rival]), denied.memory, managed, true))).toHaveLength(1);
+  });
+
+  it('plan and record nothing while sending is paused or off, so the mouse counts as come back afterwards', () => {
+    const paused = planReapply(scanOf([rival]), fresh, managed, false);
+    expect(paused.sends).toEqual([]);
+    expect(paused.memory.reapplied.size).toBe(0);
+    expect(sent(planReapply(scanOf([rival]), paused.memory, managed, true))).toHaveLength(1);
+  });
+
+  it('send DPI stages only while a change is pending, and nothing to a mouse the app does not manage', () => {
+    const pending = withDevice(managed, RIVAL_USB_ID, {
+      ...defaultDeviceSettings(),
+      managed: allManaged(true),
+      dpiSync: 'pending',
+    });
+    expect(sent(planReapply(scanOf([rival]), fresh, pending, true))).toEqual([['1038:1870', ['dpi', 'rate', 'light']]]);
+    const own = planReapply(scanOf([rival]), fresh, defaultSettings(), true);
+    expect(own.sends).toEqual([]);
+    expect(own.memory.reapplied.get('1038:1870')).toBe('first plug-in');
   });
 });
 

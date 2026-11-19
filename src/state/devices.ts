@@ -6,8 +6,10 @@ import type {
   MouseCaps,
   ScanReport,
   SettingGroup,
+  Settings,
 } from '../backend/types';
 import type { StringKey } from '../i18n';
+import { deviceSettings } from './settings';
 
 /** A device in the list. The supported mouse stays listed while it is unplugged (`present: false`). */
 export interface DeviceEntry {
@@ -125,6 +127,46 @@ export function comebacks(scan: ScanReport, reapplied: ReadonlyMap<string, strin
  */
 export type GroupStatus = 'idle' | 'sending' | 'sent' | 'echoed' | 'verified' | 'notSent' | 'failed';
 export type ApplyStatus = Exclude<GroupStatus, 'idle'> | 'own' | 'paused' | 'stored' | 'waiting';
+
+/** What the app keeps between scans to tell a device that came back. */
+export interface ReapplyMemory {
+  /** By device id, the plug-in that last got its settings. */
+  reapplied: ReadonlyMap<string, string>;
+  /** The wakes from sleep the last scan reported; `null` before the first scan. */
+  wakes: number | null;
+}
+
+export interface ReapplyPlan {
+  memory: { reapplied: Map<string, string>; wakes: number };
+  /** The setting groups each device gets again. */
+  sends: { target: DeviceSummary; groups: SettingGroup[] }[];
+}
+
+/**
+ * What a scan sends again. A device that came back (plugged in, reachable again, or found when the app starts) gets
+ * the settings it forgets, and a wake from sleep counts every device as come back. While sending is paused or off
+ * nothing is planned or recorded, so the devices count as come back once it resumes.
+ */
+export function planReapply(
+  scan: ScanReport,
+  memory: ReapplyMemory,
+  settings: Settings,
+  canSend: boolean,
+): ReapplyPlan {
+  const woke = memory.wakes !== null && scan.wakes !== memory.wakes;
+  const reapplied = new Map<string, string>(woke ? [] : memory.reapplied);
+  const here = new Set(reachable(scan).map((d) => d.id));
+  for (const id of [...reapplied.keys()]) if (!here.has(id)) reapplied.delete(id);
+  const sends: ReapplyPlan['sends'] = [];
+  if (canSend) {
+    for (const target of comebacks(scan, reapplied)) {
+      reapplied.set(target.id, target.instance);
+      const groups = reapplyGroups(deviceSettings(settings, target.usbId));
+      if (groups.length > 0) sends.push({ target, groups });
+    }
+  }
+  return { memory: { reapplied, wakes: scan.wakes }, sends };
+}
 
 /** What a DPI send's answer means for the stages kept here: only the mouse's confirmation puts them on the mouse. */
 export function dpiSyncAfter(sync: DpiSync, outcome: ApplyOutcome): DpiSync {
