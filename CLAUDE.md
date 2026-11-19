@@ -34,7 +34,7 @@ src/                React UI: app/useTune.ts (state and actions), screens/, comp
                     i18n/ (en.ts, tr.ts), theme/ (tokens computed for light and dark), backend/ (Tauri calls and
                     an in-page mock for `npm run dev`)
 packaging/linux/    the udev rule, also bundled as an app resource
-docs/               the Phase 0 hardware test guide (Turkish)
+docs/               the Phase 0 hardware test and the Phase 1 try-out guides (Turkish)
 ```
 
 ## Commands
@@ -77,6 +77,10 @@ vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune
   run device-writing commands, `sudo` or udev changes yourself. The app on real devices (`npm run app`,
   `target/release/tune` without `--mock`) sends settings to a plugged-in mouse, so it counts as device-writing; check
   your work with `npm run app:mock` or `npm run dev`.
+- **The owner's running app.** `npm run app` rebuilds and restarts on Rust edits and takes frontend edits live, and
+  every start sends the saved settings to the mouse. Before editing `crates/`, `src-tauri/` or `src/`, check that no
+  real-backend Tune runs (`ps -eo pid,args | grep -E 'tauri dev|target/(debug|release)/tune'`); if the owner's does,
+  ask them to stop it first. `docs/` is not watched.
 - **udev rule.** hidraw of the one settings interface only, `TAG+="uaccess"`, no `GROUP`/`MODE`, numbered below 73;
   check it with `udevadm verify`.
 - **Publishing.** No GitHub repository, push or release without the owner's explicit go-ahead.
