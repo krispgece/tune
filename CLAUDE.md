@@ -19,7 +19,9 @@ Rival 3 Gen 2 the app sends DPI stages, polling rate and lighting. Installing or
 - First device: the wired Rival 3 Gen 2. Colour and polling rate live on the PC and are sent again on plug-in, at
   app start and after the computer wakes (the mouse forgets them). The mouse stores DPI stages and the stage it was
   last on by itself, so the app sends DPI only when it changes, and shows stages as on the mouse only after the mouse
-  confirmed them (`dpiSync` in the settings). The app sends no save command. A mouse that drops off twice soon after a send pauses re-applying until the user tries again.
+  confirmed them (`dpiSync` in the settings). The app sends no save command. A mouse that drops off twice soon after a
+  send pauses sending until the user tries again, also across restarts (the file `reapply-paused` next to the
+  settings file).
 
 ## Layout
 

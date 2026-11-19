@@ -15,6 +15,8 @@ use tune_core::{Backend, BackendKind};
 
 /// The access rule among the app's resources; `bundle.resources` in `tauri.conf.json` puts it there.
 const BUNDLED_RULE: &str = "udev/70-tune-rival3-gen2.rules";
+/// Next to the settings file while sending is paused for safety, so the pause holds across restarts.
+const PAUSE_FILE: &str = "reapply-paused";
 
 struct AppState {
     backend: Box<dyn Backend>,
@@ -148,9 +150,10 @@ pub fn run() {
                     store: SettingsStore::memory(),
                 }
             } else {
+                let config = app.path().app_config_dir()?;
                 AppState {
-                    backend: Box::new(SsggBackend::new()),
-                    store: SettingsStore::file(app.path().app_config_dir()?.join("settings.json")),
+                    backend: Box::new(SsggBackend::with_pause_file(config.join(PAUSE_FILE))),
+                    store: SettingsStore::file(config.join("settings.json")),
                 }
             };
             app.manage(state);

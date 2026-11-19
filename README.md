@@ -18,7 +18,8 @@ tried on one mouse in the Phase 0 hardware test (`docs/`).
   them again whenever the mouse is plugged in, when the app starts and when the computer wakes from sleep. The mouse
   stores its DPI stages itself, so the app sends them only when they change. The app sends no command to save
   settings into the mouse.
-- If the mouse drops off twice right after the app sent it something, the app stops sending until you try again.
+- If the mouse drops off twice right after the app sent it something, the app stops sending until you try again,
+  also after a restart.
 - Features keep an "Experimental" badge until they are verified on hardware.
 - The interface is in English by default and also in Turkish, with light and dark themes.
 

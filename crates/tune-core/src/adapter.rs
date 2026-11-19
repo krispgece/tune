@@ -4,6 +4,8 @@
 //! settings interface of one mouse for one setting group, sends it through the library and closes it again.
 
 use std::collections::{HashMap, HashSet};
+use std::io::ErrorKind;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 use std::time::{Duration, Instant};
 
@@ -43,6 +45,8 @@ pub struct SsggBackend {
     wakes: Mutex<WakeCounter>,
     /// Held while sending, so two setting groups never reach a device at once. Holds when the last send ended.
     sending: Mutex<Option<Instant>>,
+    /// A file that exists while re-applying is paused, so the pause holds across restarts until the user resumes.
+    pause_file: Option<PathBuf>,
 }
 
 impl SsggBackend {
@@ -50,8 +54,37 @@ impl SsggBackend {
         Self::default()
     }
 
+    /// Keeps the safety pause in `path`: a pause left there by an earlier run starts this one paused.
+    pub fn with_pause_file(path: impl Into<PathBuf>) -> Self {
+        let path = path.into();
+        let backend = Self {
+            pause_file: Some(path.clone()),
+            ..Self::default()
+        };
+        backend.guard().paused = matches!(path.try_exists(), Ok(true));
+        backend
+    }
+
     fn guard(&self) -> MutexGuard<'_, Guard> {
         self.guard.lock().unwrap_or_else(PoisonError::into_inner)
+    }
+
+    /// Counts the drops among the instances plugged in now and says whether re-applying is paused. A new pause is
+    /// written to the pause file; if that fails, it still holds until Tune quits.
+    fn observe_guard(&self, present: &HashSet<String>, now: Instant) -> bool {
+        let mut guard = self.guard();
+        let was_paused = guard.paused;
+        guard.observe(present, now);
+        let paused = guard.paused;
+        drop(guard);
+        if paused
+            && !was_paused
+            && let Some(path) = &self.pause_file
+            && let Err(error) = write_pause_file(path)
+        {
+            eprintln!("Could not keep the safety pause in {}: {error}", path.display());
+        }
+        paused
     }
 
     fn send(&self, device_id: &str, group: SettingGroup, settings: &DeviceSettings) -> Result<ApplyOutcome> {
@@ -94,12 +127,11 @@ impl Backend for SsggBackend {
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
             .observe(time_asleep());
-        let mut guard = self.guard();
-        guard.observe(&present, Instant::now());
+        let reapply_paused = self.observe_guard(&present, Instant::now());
         Ok(ScanReport {
             devices,
             access_rule: installed_rule().map(|path| path.to_string_lossy().into_owned()),
-            reapply_paused: guard.paused,
+            reapply_paused,
             wakes,
             mock_scenario: None,
         })
@@ -128,8 +160,25 @@ impl Backend for SsggBackend {
 
     fn resume_reapply(&self) -> ActionOutcome {
         self.guard().resume();
+        if let Some(path) = &self.pause_file
+            && let Err(error) = std::fs::remove_file(path)
+            && error.kind() != ErrorKind::NotFound
+        {
+            eprintln!("Could not clear the safety pause in {}: {error}", path.display());
+        }
         ActionOutcome::Done
     }
+}
+
+fn write_pause_file(path: &Path) -> std::io::Result<()> {
+    if let Some(dir) = path.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    std::fs::write(
+        path,
+        "Tune stopped sending settings after a device dropped off twice right after a send.\n\
+         Use Try again in Tune to send again.\n",
+    )
 }
 
 /// Pauses re-applying when a device drops off twice in a short time right after Tune sent it something, so a setting
@@ -578,6 +627,33 @@ mod tests {
         guard.sent("c", at(8));
         guard.observe(&present(&[]), at(9));
         assert!(!guard.paused, "the drops before resuming no longer count");
+    }
+
+    #[test]
+    fn the_safety_pause_holds_across_a_restart_until_resumed() -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let dir = tempfile::tempdir()?;
+        let path = dir.path().join("config").join("reapply-paused");
+        let start = Instant::now();
+        let at = |secs: u64| start + Duration::from_secs(secs);
+
+        let backend = SsggBackend::with_pause_file(&path);
+        backend.guard().sent("a", at(0));
+        assert!(!backend.observe_guard(&present(&[]), at(1)));
+        assert!(!path.exists());
+        backend.guard().sent("b", at(2));
+        assert!(backend.observe_guard(&present(&[]), at(3)));
+        assert!(path.exists());
+
+        let restarted = SsggBackend::with_pause_file(&path);
+        assert!(restarted.guard().paused);
+        let outcome = restarted.apply("test:none", SettingGroup::Light, &DeviceSettings::default())?;
+        assert_eq!(outcome, ApplyOutcome::NotSent);
+
+        assert_eq!(restarted.resume_reapply(), ActionOutcome::Done);
+        assert!(!restarted.guard().paused);
+        assert!(!path.exists());
+        assert!(!SsggBackend::with_pause_file(&path).guard().paused);
+        Ok(())
     }
 
     #[test]
