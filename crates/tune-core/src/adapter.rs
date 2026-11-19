@@ -393,6 +393,10 @@ fn mouse_caps(model: &MouseModel) -> MouseCaps {
 mod tests {
     use std::borrow::Cow;
     use std::cell::RefCell;
+    use std::collections::VecDeque;
+
+    use steelseries_gg::devices::Device;
+    use steelseries_gg::devices::mice::PollRateReadback;
 
     use super::*;
     use crate::settings::Zones;
@@ -533,7 +537,8 @@ mod tests {
     fn nothing_is_sent_while_paused() -> Result<()> {
         let backend = SsggBackend::new();
         backend.guard().paused = true;
-        let outcome = backend.apply("1038:1870", SettingGroup::Dpi, &DeviceSettings::default())?;
+        // An id no device has, so nothing could be reached even if the pause check moved.
+        let outcome = backend.apply("test:none", SettingGroup::Dpi, &DeviceSettings::default())?;
         assert_eq!(outcome, ApplyOutcome::NotSent);
         Ok(())
     }
@@ -549,6 +554,252 @@ mod tests {
         assert_eq!(outcome_of(&[echoed(0), SettingAck::NoReply]), ApplyOutcome::Sent);
         assert_eq!(outcome_of(&[echoed(0), echoed(7)]), ApplyOutcome::Sent);
         assert_eq!(outcome_of(&[]), ApplyOutcome::Sent);
+    }
+
+    /// What `send_group` asked the mouse to do.
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    enum Call {
+        Dpi(u16),
+        Stages(Vec<u16>, u8),
+        Rate(u16),
+        Color(Color),
+        Zone(u8, Color),
+        ReadRate,
+    }
+
+    /// What the polling-rate read-back gives.
+    enum Readback {
+        /// A reply, naming a rate or (`None`) none.
+        Rate(Option<u16>),
+        NoReply,
+        Fails,
+    }
+
+    /// A mouse that records each call and answers from a script. Like the library, each setting call replaces the
+    /// answers of the one before.
+    struct FakeMouse {
+        info: DeviceInfo,
+        calls: Vec<Call>,
+        /// The answers to the next setting calls, in order; a call with none scripted gets one clean answer.
+        answers: VecDeque<Vec<SettingAck>>,
+        last: Vec<SettingAck>,
+        readback: Readback,
+        /// Every setting call fails, as when the mouse is unplugged mid-send.
+        fails: bool,
+    }
+
+    impl FakeMouse {
+        fn new() -> Self {
+            Self {
+                info: info(DeviceType::Mouse, 0x1870, "Rival 3 Gen 2", None),
+                calls: Vec::new(),
+                answers: VecDeque::new(),
+                last: Vec::new(),
+                readback: Readback::NoReply,
+                fails: false,
+            }
+        }
+
+        fn setting(&mut self, call: Call) -> steelseries_gg::Result<()> {
+            self.calls.push(call);
+            if self.fails {
+                return Err(steelseries_gg::Error::DeviceCommunication(
+                    "the mouse is gone".to_owned(),
+                ));
+            }
+            self.last = self.answers.pop_front().unwrap_or_else(|| vec![echoed(0)]);
+            Ok(())
+        }
+    }
+
+    impl Device for FakeMouse {
+        fn info(&self) -> &DeviceInfo {
+            &self.info
+        }
+
+        fn device_type(&self) -> DeviceType {
+            DeviceType::Mouse
+        }
+
+        fn initialize(&mut self) -> steelseries_gg::Result<()> {
+            Ok(())
+        }
+
+        fn close(&mut self) -> steelseries_gg::Result<()> {
+            Ok(())
+        }
+
+        fn is_connected(&self) -> bool {
+            true
+        }
+
+        fn send_raw(&mut self, _data: &[u8]) -> steelseries_gg::Result<()> {
+            Err(steelseries_gg::Error::DeviceCommunication(
+                "the fake takes no raw data".to_owned(),
+            ))
+        }
+
+        fn receive_raw(&mut self, _buf: &mut [u8]) -> steelseries_gg::Result<usize> {
+            Err(steelseries_gg::Error::DeviceCommunication(
+                "the fake gives no raw data".to_owned(),
+            ))
+        }
+    }
+
+    impl Mouse for FakeMouse {
+        fn set_dpi(&mut self, dpi: u16) -> steelseries_gg::Result<()> {
+            self.setting(Call::Dpi(dpi))
+        }
+
+        fn set_dpi_stages(&mut self, stages: &[u16], active: u8) -> steelseries_gg::Result<()> {
+            self.setting(Call::Stages(stages.to_vec(), active))
+        }
+
+        fn set_poll_rate(&mut self, hz: u16) -> steelseries_gg::Result<()> {
+            self.setting(Call::Rate(hz))
+        }
+
+        fn set_color(&mut self, color: Color) -> steelseries_gg::Result<()> {
+            self.setting(Call::Color(color))
+        }
+
+        fn set_zone_color(&mut self, zone: u8, color: Color) -> steelseries_gg::Result<()> {
+            self.setting(Call::Zone(zone, color))
+        }
+
+        fn battery_level(&mut self) -> steelseries_gg::Result<Option<u8>> {
+            Ok(None)
+        }
+
+        fn poll_rate_readback(&mut self) -> steelseries_gg::Result<Option<PollRateReadback>> {
+            self.calls.push(Call::ReadRate);
+            match self.readback {
+                Readback::Rate(hz) => Ok(Some(PollRateReadback { reply: Vec::new(), hz })),
+                Readback::NoReply => Ok(None),
+                Readback::Fails => Err(steelseries_gg::Error::DeviceCommunication("no read-back".to_owned())),
+            }
+        }
+
+        fn last_acknowledgements(&self) -> &[SettingAck] {
+            &self.last
+        }
+    }
+
+    fn mouse_settings() -> DeviceSettings {
+        DeviceSettings {
+            dpi_stages: vec![400, 800, 1600, 3200],
+            start_stage: 2,
+            poll_rate_hz: 500,
+            color: "#ff0000".to_owned(),
+            zones: Zones {
+                front: "#0000ff".to_owned(),
+                middle: "#00ff00".to_owned(),
+                rear: "#ffffff".to_owned(),
+            },
+            ..DeviceSettings::default()
+        }
+    }
+
+    #[test]
+    fn dpi_goes_out_as_stages_with_the_start_stage_or_as_one_value() -> Result<()> {
+        let mut mouse = FakeMouse::new();
+        assert_eq!(
+            send_group(&mut mouse, SettingGroup::Dpi, &mouse_settings())?,
+            ApplyOutcome::Echoed
+        );
+        assert_eq!(mouse.calls, [Call::Stages(vec![400, 800, 1600, 3200], 2)]);
+
+        let single = DeviceSettings {
+            dpi_stages: vec![800],
+            start_stage: 0,
+            ..mouse_settings()
+        };
+        let mut mouse = FakeMouse::new();
+        send_group(&mut mouse, SettingGroup::Dpi, &single)?;
+        assert_eq!(mouse.calls, [Call::Dpi(800)]);
+        Ok(())
+    }
+
+    fn send_rate(readback: Readback) -> Result<(ApplyOutcome, Vec<Call>)> {
+        let mut mouse = FakeMouse {
+            readback,
+            ..FakeMouse::new()
+        };
+        let outcome = send_group(&mut mouse, SettingGroup::Rate, &mouse_settings())?;
+        Ok((outcome, mouse.calls))
+    }
+
+    #[test]
+    fn a_polling_rate_is_verified_only_by_a_read_back_naming_it() -> Result<()> {
+        let (outcome, calls) = send_rate(Readback::Rate(Some(500)))?;
+        assert_eq!(calls, [Call::Rate(500), Call::ReadRate]);
+        assert_eq!(outcome, ApplyOutcome::Verified);
+        // No read-back, one naming no rate, or a failed one leave the outcome to the answer.
+        assert_eq!(send_rate(Readback::NoReply)?.0, ApplyOutcome::Echoed);
+        assert_eq!(send_rate(Readback::Rate(None))?.0, ApplyOutcome::Echoed);
+        assert_eq!(send_rate(Readback::Fails)?.0, ApplyOutcome::Echoed);
+        Ok(())
+    }
+
+    #[test]
+    fn lighting_sets_every_zone_or_each_zone_and_needs_every_answer() -> Result<()> {
+        let mut mouse = FakeMouse::new();
+        assert_eq!(
+            send_group(&mut mouse, SettingGroup::Light, &mouse_settings())?,
+            ApplyOutcome::Echoed
+        );
+        assert_eq!(mouse.calls, [Call::Color(Color::new(255, 0, 0))]);
+
+        let zones = DeviceSettings {
+            light_mode: LightMode::Zones,
+            ..mouse_settings()
+        };
+        let mut mouse = FakeMouse::new();
+        assert_eq!(
+            send_group(&mut mouse, SettingGroup::Light, &zones)?,
+            ApplyOutcome::Echoed
+        );
+        assert_eq!(
+            mouse.calls,
+            [
+                Call::Zone(0, Color::new(0, 0, 255)),
+                Call::Zone(1, Color::new(0, 255, 0)),
+                Call::Zone(2, Color::new(255, 255, 255)),
+            ]
+        );
+
+        // The front zone's answer went missing; the clean answers of the later zones must not hide that.
+        let mut mouse = FakeMouse {
+            answers: VecDeque::from([vec![SettingAck::NoReply]]),
+            ..FakeMouse::new()
+        };
+        assert_eq!(send_group(&mut mouse, SettingGroup::Light, &zones)?, ApplyOutcome::Sent);
+
+        let off = DeviceSettings {
+            light_mode: LightMode::Off,
+            ..mouse_settings()
+        };
+        let mut mouse = FakeMouse::new();
+        send_group(&mut mouse, SettingGroup::Light, &off)?;
+        assert_eq!(mouse.calls, [Call::Color(Color::BLACK)]);
+        Ok(())
+    }
+
+    #[test]
+    fn a_failing_mouse_ends_the_send_with_an_error() {
+        let zones = DeviceSettings {
+            light_mode: LightMode::Zones,
+            ..mouse_settings()
+        };
+        let mut mouse = FakeMouse {
+            fails: true,
+            ..FakeMouse::new()
+        };
+        assert!(matches!(
+            send_group(&mut mouse, SettingGroup::Light, &zones),
+            Err(Error::Send(_))
+        ));
+        assert_eq!(mouse.calls.len(), 1, "nothing more goes out after a failure");
     }
 
     #[test]
