@@ -98,6 +98,14 @@ export interface AppInfo {
   backend: 'device' | 'mock';
   /** False when sending is off: choices stay on this computer. */
   sendsSettings: boolean;
+  /** True when the app has a tray icon and keeps running after its window is closed. */
+  tray: boolean;
+}
+
+export interface AutostartStatus {
+  /** False where starting at login can't work, as in a development build. */
+  available: boolean;
+  enabled: boolean;
 }
 
 export interface AccessRuleInfo {
@@ -117,4 +125,8 @@ export interface Backend {
   resumeReapply(): Promise<ActionOutcome>;
   setMockScenario(scenario: Scenario): Promise<void>;
   accessRule(): Promise<AccessRuleInfo>;
+  autostartStatus(): Promise<AutostartStatus>;
+  setAutostart(enabled: boolean): Promise<AutostartStatus>;
+  /** The tray menu's texts, in the interface language. */
+  setTrayTexts(open: string, quit: string): Promise<void>;
 }

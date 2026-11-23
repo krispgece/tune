@@ -6,6 +6,7 @@ import {
   type ActionOutcome,
   type AppInfo,
   type ApplyOutcome,
+  type AutostartStatus,
   type Backend,
   type DeviceSettings,
   type DeviceSummary,
@@ -88,6 +89,8 @@ export function useTune(backend: Backend) {
   const [removeHelp, setRemoveHelp] = useState(false);
   const [guardHidden, setGuardHidden] = useState(false);
   const [toast, setToast] = useState<ToastKind | null>(null);
+  const [autostart, setAutostartStatus] = useState<AutostartStatus | null>(null);
+  const [autostartFailed, setAutostartFailed] = useState(false);
 
   const latest = useRef<Settings | null>(null);
   const saveTimer = useRef<number | undefined>(undefined);
@@ -117,6 +120,12 @@ export function useTune(backend: Backend) {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    backend
+      .setTrayTexts(i18n.t('trayOpen'), i18n.t('trayQuit'))
+      .catch((e: unknown) => console.error('Updating the tray menu failed:', e));
+  }, [backend, i18n]);
 
   // Settings: changed here at once, saved shortly after the last change.
   const saveNow = useCallback(() => {
@@ -174,6 +183,10 @@ export function useTune(backend: Backend) {
       if (!alive) return;
       setInfo(appInfo);
       setRule(accessRule);
+      backend.autostartStatus().then(
+        (status) => alive && setAutostartStatus(status),
+        (e: unknown) => console.error('Reading the start-at-login choice failed:', e),
+      );
       latest.current = loaded;
       setSettings(loaded);
       await rescan();
@@ -446,6 +459,16 @@ export function useTune(backend: Backend) {
     else await rescan();
   };
 
+  const setAutostart = async (enabled: boolean) => {
+    try {
+      setAutostartStatus(await backend.setAutostart(enabled));
+      setAutostartFailed(false);
+    } catch (e) {
+      console.error('Changing the start-at-login choice failed:', e);
+      setAutostartFailed(true);
+    }
+  };
+
   const retry = async () => {
     try {
       await backend.resumeReapply();
@@ -484,6 +507,8 @@ export function useTune(backend: Backend) {
     removeHelp,
     guardHidden,
     toast,
+    autostart,
+    autostartFailed,
     i18n,
     mode,
     theme,
@@ -513,6 +538,7 @@ export function useTune(backend: Backend) {
     setZone,
     stopManaging,
     retry,
+    setAutostart,
     keepOff: () => setGuardHidden(true),
     applyScenario,
   };

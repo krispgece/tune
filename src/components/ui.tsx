@@ -75,6 +75,7 @@ export function Segmented<T extends string | number>(props: {
   labelledBy: string;
   className?: string;
   style?: CSSProperties;
+  disabled?: boolean;
 }) {
   const { options, value, onChange } = props;
   return (
@@ -90,6 +91,7 @@ export function Segmented<T extends string | number>(props: {
           type="button"
           lang={option.lang}
           aria-pressed={option.value === value}
+          disabled={props.disabled}
           onClick={() => option.value !== value && onChange(option.value)}
         >
           {option.label}

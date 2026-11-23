@@ -30,6 +30,7 @@ export class BrowserMock implements Backend {
   /** The rule has reached the mouse. */
   private access = false;
   private paused = false;
+  private autostart = false;
   private settings: Settings = defaultSettings();
 
   constructor(private readonly delays: Delays = { access: 1600, apply: 300 }) {}
@@ -42,7 +43,7 @@ export class BrowserMock implements Backend {
   }
 
   async appInfo() {
-    return { name: APP_NAME, version: pkg.version, backend: 'mock' as const, sendsSettings: true };
+    return { name: APP_NAME, version: pkg.version, backend: 'mock' as const, sendsSettings: true, tray: true };
   }
 
   async scan(): Promise<ScanReport> {
@@ -126,4 +127,15 @@ export class BrowserMock implements Backend {
   async accessRule() {
     return { fileName: RULE_FILE_NAME, source: null };
   }
+
+  async autostartStatus() {
+    return { available: true, enabled: this.autostart };
+  }
+
+  async setAutostart(enabled: boolean) {
+    this.autostart = enabled;
+    return this.autostartStatus();
+  }
+
+  async setTrayTexts() {}
 }

@@ -64,7 +64,7 @@ export const tr: Strings = {
   hVerified: 'fare rapor hızını geri bildirdi ve seçtiğinle aynı.',
   hStored: 'fare DPI kademelerini kendisi saklar; {app} onları yalnızca sen değiştirdiğinde gönderir.',
   hWaiting: '{app} bu kademeleri fareye göndermedi, farede başka kademeler olabilir; sen değiştirdiğinde gönderilir.',
-  hFailed: '{app} fareye ulaşamadı; bir sonraki açılışında ve açıkken fare her takıldığında yeniden dener.',
+  hFailed: '{app} fareye ulaşamadı; bir sonraki açılışında ve çalışırken fare her takıldığında yeniden dener.',
   hOwn: '{app} bu ayarı yönetmiyor; farenin kendi değeri geçerli.',
   hPaused: 'koruma devrede, ayar gönderilmiyor.',
   hNotSent: 'bu sürümde gönderme, donanım testi doğrulayana kadar kapalı; seçimin bu bilgisayarda saklanır.',
@@ -92,7 +92,7 @@ export const tr: Strings = {
   // Polling rate
   rateTitle: 'Rapor hızı',
   rateNote:
-    'Yüksek değer imleci daha akıcı yapar. Bu farede üst sınır {max} Hz. Fare çıkarılınca kendi hızına döner; {app} açıkken seninkini fare her takıldığında yeniden gönderir.',
+    'Yüksek değer imleci daha akıcı yapar. Bu farede üst sınır {max} Hz. Fare çıkarılınca kendi hızına döner; {app} çalışırken seninkini fare her takıldığında yeniden gönderir.',
 
   // Lighting
   lightColour: 'Işık rengi',
@@ -108,7 +108,7 @@ export const tr: Strings = {
   zRear: 'Arka',
   waveNote: 'Tıklayınca geçen beyaz dalga farenin kendi kayıtlı efekti; bu sürüm onu değiştirmez.',
   saveNote:
-    'Fare renkleri saklamaz: çıkarılınca kendi ışığı geri gelir. {app} renklerini açılınca gönderir; açıkken de fare her takıldığında ve bilgisayar uykudan uyandığında yeniden gönderir.',
+    'Fare renkleri saklamaz: çıkarılınca kendi ışığı geri gelir. {app} renklerini açılınca gönderir; çalışırken de fare her takıldığında ve bilgisayar uykudan uyandığında yeniden gönderir.',
   previewOff: 'Fare önizlemesi: ışıklar kapalı',
   previewOn: 'Fare önizlemesi: ön bölge {front}, orta bölge {middle}, arka bölge {rear}',
   shade: '{hue} tonu {hex}',
@@ -204,6 +204,17 @@ export const tr: Strings = {
   allowLater: 'İzni buradan kurmak sonraki bir sürümde gelecek. Şimdilik terminal komutlarını kullan.',
   removeLater:
     'İzni buradan kaldırmak sonraki bir sürümde gelecek. Şimdi kaldırmak için bu komutları terminalde çalıştır. Fare, çıkarılıp yeniden takılana kadar izni korur.',
+  startupTitle: 'Başlangıç',
+  startAtLogin: 'Oturum açılınca başlat',
+  switchOff: 'Kapalı',
+  switchOn: 'Açık',
+  startupText: '{app} oturum açılınca penceresiz olarak tepside başlar ve renk ile rapor hızını fareye gönderir.',
+  startupDev: "Bu geliştirme sürümü oturum açılınca başlayamaz; {app}'un yayın sürümü başlayabilir.",
+  startupFailed: '{app} bunu değiştiremedi. Yeniden dene.',
+  trayText:
+    "Pencereyi kapatınca {app} tepside çalışmaya devam eder; fare takılınca ayarlarını yine gönderir. Tamamen kapatmak için tepsi menüsünde \"{app}'dan çık\" seçeneğini kullan.",
+  trayOpen: "{app}'u aç",
+  trayQuit: "{app}'dan çık",
   privacy: 'Gizlilik',
   privacyText: 'İnternete bağlanmaz, veri göndermez.',
 
@@ -280,7 +291,7 @@ export const tr: Strings = {
   readyTitle: 'Hazırsın',
   readyText: '{device} hazır.',
   readyTextNone: '{app} hazır.',
-  ready1: 'Renk ve rapor hızı bu bilgisayarda saklanır; {app} açıkken fare her takıldığında yeniden gönderilir.',
+  ready1: 'Renk ve rapor hızı bu bilgisayarda saklanır; {app} çalışırken fare her takıldığında yeniden gönderilir.',
   ready2: 'DPI kademeleri farenin kendisinde saklanır; değişiklik fare çıkarılınca da kalır.',
   ready3: 'Başka bir SteelSeries cihazı taktığında cihaz listesinde görünür.',
   openApp: "{app}'u aç",

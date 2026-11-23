@@ -62,7 +62,7 @@ export const en = {
   hVerified: 'the mouse reported the polling rate back, and it matches.',
   hStored: 'the mouse keeps its DPI stages itself; {app} sends them only when you change them.',
   hWaiting: "{app} hasn't sent these stages to the mouse, so it may still have others; they go out when you change them.",
-  hFailed: "{app} couldn't reach the mouse. It tries again the next time it starts and, while it's open, each time the mouse is plugged in.",
+  hFailed: "{app} couldn't reach the mouse. It tries again the next time it starts and, while it runs, each time the mouse is plugged in.",
   hOwn: "{app} isn't managing this setting; the mouse's own value applies.",
   hPaused: 'protection is on; nothing is being sent.',
   hNotSent: 'sending is off in this version until the hardware test confirms it; your choice is kept on this computer.',
@@ -90,7 +90,7 @@ export const en = {
   // Polling rate
   rateTitle: 'Polling rate',
   rateNote:
-    "A higher value makes the pointer smoother. This mouse goes up to {max} Hz. It goes back to its own rate when it's unplugged; while {app} is open, it sends yours again each time the mouse is plugged in.",
+    "A higher value makes the pointer smoother. This mouse goes up to {max} Hz. It goes back to its own rate when it's unplugged; while {app} is running, it sends yours again each time the mouse is plugged in.",
 
   // Lighting
   lightColour: 'Light colour',
@@ -106,7 +106,7 @@ export const en = {
   zRear: 'Rear',
   waveNote: "The white wave on click is the mouse's own stored effect; this version doesn't change it.",
   saveNote:
-    "The mouse doesn't keep colours: when it's unplugged, its own lighting comes back. {app} sends your colours again when it starts and, while it's open, each time the mouse is plugged in or the computer wakes from sleep.",
+    "The mouse doesn't keep colours: when it's unplugged, its own lighting comes back. {app} sends your colours again when it starts and, while it runs, each time the mouse is plugged in or the computer wakes from sleep.",
   previewOff: 'Mouse preview: lights off',
   previewOn: 'Mouse preview: front zone {front}, middle zone {middle}, rear zone {rear}',
   shade: '{hue} shade {hex}',
@@ -201,6 +201,17 @@ export const en = {
   allowLater: 'Installing the permission from here comes in a later version. For now, use the terminal commands.',
   removeLater:
     'Removing the permission from here comes in a later version. To remove it now, run these commands in a terminal. The mouse keeps the permission until you unplug it.',
+  startupTitle: 'Start-up',
+  startAtLogin: 'Start at login',
+  switchOff: 'Off',
+  switchOn: 'On',
+  startupText: '{app} starts in the tray when you log in, without its window, and sends your colour and polling rate to the mouse.',
+  startupDev: "This development build can't start at login; the release build of {app} can.",
+  startupFailed: "{app} couldn't change this. Try again.",
+  trayText:
+    'Closing the window keeps {app} running in the tray, so it still sends your settings when the mouse is plugged in. To stop it, choose Quit {app} in the tray menu.',
+  trayOpen: 'Open {app}',
+  trayQuit: 'Quit {app}',
   privacy: 'Privacy',
   privacyText: "Doesn't connect to the internet or send any data.",
 
@@ -277,7 +288,7 @@ export const en = {
   readyTitle: "You're all set",
   readyText: '{device} is ready.',
   readyTextNone: '{app} is ready.',
-  ready1: "Colour and polling rate are kept on this computer; while {app} is open, they're sent again each time the mouse is plugged in.",
+  ready1: "Colour and polling rate are kept on this computer; while {app} is running, they're sent again each time the mouse is plugged in.",
   ready2: "DPI stages are stored on the mouse itself, so a change stays when it's unplugged.",
   ready3: 'Plug in another SteelSeries device and it shows up in the device list.',
   openApp: 'Open {app}',

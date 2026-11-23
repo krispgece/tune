@@ -16,6 +16,15 @@ describe('browser mock', () => {
     expect((await mock.appInfo()).sendsSettings).toBe(true);
   });
 
+  it('keeps the start-at-login choice in memory and has a tray', async () => {
+    const mock = quick();
+    expect((await mock.appInfo()).tray).toBe(true);
+    expect(await mock.autostartStatus()).toEqual({ available: true, enabled: false });
+    expect(await mock.setAutostart(true)).toEqual({ available: true, enabled: true });
+    expect((await mock.autostartStatus()).enabled).toBe(true);
+    await mock.setTrayTexts('Open', 'Quit');
+  });
+
   it('grants access and leaves the mouse its own settings', async () => {
     const mock = quick();
     expect(await mock.requestAccess()).toBe('done');

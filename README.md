@@ -16,9 +16,12 @@ tried on one mouse, first by hand in the Phase 0 hardware test and then from the
 - First supported device: the wired Rival 3 Gen 2. Other SteelSeries devices that ssgg recognizes show up as "Not
   supported yet", and nothing is sent to them.
 - The mouse forgets its colour and polling rate when it's unplugged, so the app keeps them on the computer and sends
-  them again when it starts and, while it's open, whenever the mouse is plugged in or the computer wakes from sleep.
-  Nothing is sent while the app is closed, and it doesn't start on its own yet. The mouse stores its DPI stages itself,
-  so the app sends them only when they change. The app sends no command to save settings into the mouse.
+  them again when it starts and, while it runs, whenever the mouse is plugged in or the computer wakes from sleep.
+  The mouse stores its DPI stages itself, so the app sends them only when they change. The app sends no command to
+  save settings into the mouse.
+- Closing the window keeps the app running in the tray; Quit in the tray menu stops it, and then nothing is sent.
+  It can also start when you log in (Settings › Start-up), in the tray without its window. Only one copy runs at a
+  time: starting the app again opens the window of the one that runs.
 - If the mouse drops off twice right after the app sent it something, the app stops sending until you try again,
   also after a restart.
 - Features keep an "Experimental" badge until testing beyond that one mouse confirms them.
@@ -43,6 +46,11 @@ npm run app:release  # release build, written to target/release/tune
 npm run dev          # the interface alone in a browser (http://localhost:1420), with built-in fake devices
 ```
 
+Starting at login works with the release build only: a development build loads its interface from the dev server,
+which does not run then. Start `target/release/tune` and turn on Settings › Start-up › Start at login. That writes
+`~/.config/autostart/local.tune.desktop`, which starts the same program with `--background`; turning the switch off
+removes the file. The fake devices keep this choice in memory too.
+
 With fake devices, a bar at the top switches between the situations the app handles (first launch, several devices,
 mouse unplugged, no permission, and so on). The app keeps its settings in `~/.config/local.tune.desktop/`; the fake
 devices keep theirs in memory only.
@@ -52,8 +60,9 @@ Tests: `npm test` and `cargo test --locked`.
 ## Contents
 
 - `src/`: the interface (React, TypeScript), its English and Turkish strings and both themes.
-- `src-tauri/`: the desktop shell (Tauri 2): the window and the commands the interface calls.
-- `crates/tune-core/`: the adapter to the ssgg library, the fake devices and the settings file.
+- `src-tauri/`: the desktop shell (Tauri 2): the window, the tray icon and the commands the interface calls.
+- `crates/tune-core/`: the adapter to the ssgg library, the fake devices, the settings file, the login entry and the
+  single-copy lock.
 - `docs/`: hardware test guides (in Turkish).
 - `packaging/linux/`: a udev rule that gives the user signed in at the computer access to the mouse's settings
   interface only.

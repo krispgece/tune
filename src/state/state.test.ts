@@ -302,7 +302,7 @@ describe('re-sending', () => {
 });
 
 describe('diagnostics', () => {
-  const info: AppInfo = { name: 'App', version: '0.1.0', backend: 'mock', sendsSettings: true };
+  const info: AppInfo = { name: 'App', version: '0.1.0', backend: 'mock', sendsSettings: true, tray: true };
 
   it('describe the device and its settings', () => {
     const settings = { ...defaultDeviceSettings(), managed: { dpi: true, rate: false, light: true } };

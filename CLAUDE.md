@@ -22,14 +22,20 @@ Rival 3 Gen 2 the app sends DPI stages, polling rate and lighting. Installing or
   after the mouse confirmed them (`dpiSync` in the settings). The app sends no save command. A mouse that drops off
   twice soon after a send pauses sending until the user tries again, also across restarts (the file `reapply-paused`
   next to the settings file).
+- The app lives in the tray: closing the window hides it and the re-sends go on; Quit in the tray menu ends it.
+  `--background` starts it with the window hidden, which is how the login entry (`~/.config/autostart/<app id>.desktop`,
+  release builds only) starts it. One copy runs at a time: a lock and a socket in `$XDG_RUNTIME_DIR/<app id>/`
+  (`tune.*`, `tune-mock.*` for the mock); a second start asks the first to show its window and ends.
 
 ## Layout
 
 ```
 crates/tune-core/   adapter.rs (the only module that calls steelseries_gg: device list, sending, re-apply pause),
                     mock.rs (fake devices and situations), settings.rs (settings file), access.rs (udev rule name,
-                    node access, which plug-in a node belongs to)
-src-tauri/          the window and the commands the interface calls; picks the mock with --mock or TUNE_BACKEND=mock
+                    node access, which plug-in a node belongs to), autostart.rs (login entry),
+                    single_instance.rs (one copy at a time)
+src-tauri/          the window, the tray and the commands the interface calls; picks the mock with --mock or
+                    TUNE_BACKEND=mock
 src/                React UI: app/useTune.ts (state and actions), screens/, components/, state/ (pure logic),
                     i18n/ (en.ts, tr.ts), theme/ (tokens computed for light and dark), backend/ (Tauri calls and
                     an in-page mock for `npm run dev`)
@@ -82,7 +88,10 @@ vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune
   settings to the mouse. Before editing anything but Markdown files, check that no real-backend Tune runs: run
   `pgrep -af '[t]auri dev|target/(debug|release)/[t]une'` as a command of its own, and it prints nothing then (the
   brackets keep it from matching its own command line). If it lists a Tune you did not start, ask the owner to stop
-  it first.
+  it first. A Tune in the tray runs with no window (also one started at login), so it shows here, not on screen; the
+  owner ends it with Quit in the tray menu.
+- **Login items.** Turning on Start at login writes the user's autostart folder. Check it with the fake devices,
+  which keep the choice in memory; never turn it on in a real-backend run yourself.
 - **udev rule.** hidraw of the one settings interface only, `TAG+="uaccess"`, no `GROUP`/`MODE`, numbered below 73;
   check it with `udevadm verify`.
 - **Publishing.** No GitHub repository, push or release without the owner's explicit go-ahead.

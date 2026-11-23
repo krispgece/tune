@@ -52,6 +52,37 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
         </div>
       </section>
 
+      <section aria-labelledby="set-start-title" className="card">
+        <h2 id="set-start-title" className="h2">
+          {t('startupTitle')}
+        </h2>
+        <div className="box">
+          <div className="cell row-wrap spread" style={{ gap: '8px 16px' }}>
+            <span id="login-label" className="label">
+              {t('startAtLogin')}
+            </span>
+            <Segmented
+              labelledBy="login-label"
+              value={tune.autostart?.enabled ? 'on' : 'off'}
+              onChange={(value) => void tune.setAutostart(value === 'on')}
+              disabled={!tune.autostart?.available}
+              style={{ flex: '0 1 200px' }}
+              options={[
+                { value: 'off', label: t('switchOff') },
+                { value: 'on', label: t('switchOn') },
+              ]}
+            />
+          </div>
+          <p className="cell small-2">{t(tune.autostart?.available === false ? 'startupDev' : 'startupText')}</p>
+          {tune.autostartFailed && (
+            <p className="cell small-2" role="alert">
+              {t('startupFailed')}
+            </p>
+          )}
+          {tune.info?.tray && <p className="cell small-2">{t('trayText')}</p>}
+        </div>
+      </section>
+
       <section aria-labelledby="set-access-title" className="card">
         <h2 id="set-access-title" className="h2">
           {t('accessTitle')}

@@ -14,4 +14,7 @@ export const tauriBackend: Backend = {
   resumeReapply: () => invoke('resume_reapply'),
   setMockScenario: (scenario) => invoke('set_mock_scenario', { scenario }),
   accessRule: () => invoke('access_rule'),
+  autostartStatus: () => invoke('autostart_status'),
+  setAutostart: (enabled) => invoke('set_autostart', { enabled }),
+  setTrayTexts: (open, quit) => invoke('set_tray_texts', { open, quit }),
 };
