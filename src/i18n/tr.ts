@@ -221,6 +221,9 @@ export const tr: Strings = {
   legal3:
     'Burada anılan tüm markalar, logolar, ürün adları, ürün görselleri, tasarımlar ve diğer fikri ve sınai mülkiyet hakları sahiplerine aittir. Ürün adları yalnızca uyumlu cihazları tanıtmak için kullanılır. {app} hiçbir SteelSeries logosu ya da ürün görseli kullanmaz; SteelSeries GG değildir ve onun hiçbir parçasını içermez.',
   legal4: '{app}, cihaz ayarlarını üreticinin yazılımı ve desteği olmadan değiştirir. Kullanım sorumluluğu kullanıcıya aittir.',
+  creditsTitle: 'Teşekkür',
+  credits:
+    '{app} cihazlarla steelseriesgg-rs (ssgg) kütüphanesi üzerinden konuşur. Kütüphaneyi Ven0m0 geliştiriyor, ScepticDope başlattı; MIT Lisansı ile kullanılıyor (Copyright (c) 2024 ScepticDope): github.com/Ven0m0/steelseriesgg-rs. Teşekkürler.',
   licenses: 'Açık kaynak lisansları',
   licensesText:
     'ssgg (MIT), Tauri (MIT veya Apache 2.0), React (MIT), Lucide simgeleri (ISC), Inter ve Space Grotesk yazı tipleri (SIL Open Font License 1.1) ve diğer açık kaynak bileşenler.',

@@ -71,3 +71,8 @@ mentioned here belong to their respective owners. Product names appear only to i
 uses no SteelSeries logos or product images. It is not SteelSeries GG and does not include any part of it.
 
 Tune changes device settings without the manufacturer's software or support. Use it at your own risk.
+
+## Credits
+
+Tune talks to devices through [steelseriesgg-rs](https://github.com/Ven0m0/steelseriesgg-rs) (ssgg), developed by
+Ven0m0 and started by ScepticDope, used under the MIT License (Copyright (c) 2024 ScepticDope). Thank you.

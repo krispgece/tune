@@ -142,6 +142,10 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
               </p>
             ))}
           </div>
+          <div className="cell stack">
+            <h3 className="h3">{t('creditsTitle')}</h3>
+            <p className="small-2">{t('credits')}</p>
+          </div>
           <div className="cell stack" style={{ alignItems: 'flex-start' }}>
             <button
               type="button"
