@@ -19,7 +19,8 @@ tried on one mouse, first by hand in the Phase 0 hardware test and then from the
   them again when it starts and, while it runs, whenever the mouse is plugged in or the computer wakes from sleep.
   The mouse stores its DPI stages itself, so the app sends them only when they change. The app sends no command to
   save settings into the mouse.
-- Closing the window keeps the app running in the tray; Quit in the tray menu stops it, and then nothing is sent.
+- Closing the window keeps the app running in the tray; Quit (in the tray menu or in Settings › Start-up) stops it,
+  and then nothing is sent.
   It can also start when you log in (Settings › Start-up), in the tray without its window. Only one copy runs at a
   time: starting the app again opens the window of the one that runs.
 - If the mouse drops off twice right after the app sent it something, the app stops sending until you try again,
@@ -34,6 +35,9 @@ Requirements:
 - Rust (the version in `Cargo.toml`) and Node.js 18 or newer with npm.
 - The ssgg checkout next to this one, at `../steelseriesgg-rs`, on the branch `rival3-gen2/phase0`.
 - On Debian or Ubuntu: `sudo apt install build-essential pkg-config libwebkit2gtk-4.1-dev`.
+- To run: the tray icon needs `libayatana-appindicator3-1` (Ubuntu's desktop has it; otherwise
+  `sudo apt install libayatana-appindicator3-1`). Without it the app runs with no tray icon, and closing the window
+  quits it. On GNOME the icon shows only with the AppIndicator extension, which Ubuntu turns on.
 
 `.cargo/config.toml` builds for the baseline x86-64 CPU, so the app also runs on processors without AVX2. If you
 set `RUSTFLAGS` yourself, keep `-Ctarget-cpu=x86-64` in it.

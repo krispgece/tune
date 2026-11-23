@@ -22,10 +22,12 @@ Rival 3 Gen 2 the app sends DPI stages, polling rate and lighting. Installing or
   after the mouse confirmed them (`dpiSync` in the settings). The app sends no save command. A mouse that drops off
   twice soon after a send pauses sending until the user tries again, also across restarts (the file `reapply-paused`
   next to the settings file).
-- The app lives in the tray: closing the window hides it and the re-sends go on; Quit in the tray menu ends it.
-  `--background` starts it with the window hidden, which is how the login entry (`~/.config/autostart/<app id>.desktop`,
-  release builds only) starts it. One copy runs at a time: a lock and a socket in `$XDG_RUNTIME_DIR/<app id>/`
-  (`tune.*`, `tune-mock.*` for the mock); a second start asks the first to show its window and ends.
+- The app lives in the tray: closing the window hides it and the re-sends go on; Quit (tray menu, or Settings ›
+  Start-up) ends it. Without an appindicator library the tray build panics inside the library; the shell catches that
+  and runs with no tray, where closing the window quits. `--background` starts it with the window hidden, which is how
+  the login entry (`~/.config/autostart/local.tune.desktop`, named after the app id, release builds only) starts it.
+  One copy runs at a time: a lock and a socket in `$XDG_RUNTIME_DIR/<app id>/` (`tune.*`, `tune-mock.*` for the mock;
+  the tray icon's id uses the same name); a second start asks the first to show its window and ends.
 
 ## Layout
 
@@ -89,7 +91,8 @@ vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune
   `pgrep -af '[t]auri dev|target/(debug|release)/[t]une'` as a command of its own, and it prints nothing then (the
   brackets keep it from matching its own command line). If it lists a Tune you did not start, ask the owner to stop
   it first. A Tune in the tray runs with no window (also one started at login), so it shows here, not on screen; the
-  owner ends it with Quit in the tray menu.
+  owner ends it with Quit in the tray menu. The real app's lock is shared by development and release builds: while a
+  release copy runs, `npm run app` only brings up that copy's window and ends.
 - **Login items.** Turning on Start at login writes the user's autostart folder. Check it with the fake devices,
   which keep the choice in memory; never turn it on in a real-backend run yourself.
 - **udev rule.** hidraw of the one settings interface only, `TAG+="uaccess"`, no `GROUP`/`MODE`, numbered below 73;

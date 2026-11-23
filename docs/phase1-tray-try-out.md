@@ -7,9 +7,13 @@ içinde.
 Önce bil:
 
 - Oturum açılınca başlama yalnızca **yayın sürümünde** (`target/release/tune`) çalışır. `npm run app` ile açılan
-  geliştirme sürümünde bu ayar kapalı görünür; çünkü o sürüm arayüzünü terminaldeki geliştirme sunucusundan alır.
+  geliştirme sürümünde bu ayar açılamaz; çünkü o sürüm arayüzünü terminaldeki geliştirme sunucusundan alır. Yayın
+  sürümü açtıysa geliştirme sürümü onu yalnızca kapatabilir.
 - Aynı anda tek Tune çalışır. Tune açıkken onu yeniden başlatırsan yeni bir kopya açılmaz, çalışanın penceresi öne
-  gelir.
+  gelir. Bu, `npm run app` için de geçerli: tepside bir Tune çalışırken `npm run app` yeni sürümü açmaz, çalışanın
+  penceresini getirip biter. `npm run app` öncesinde tepsideki Tune'u menüden **Quit Tune** ile kapat.
+- Tune'u kapatmanın iki yolu var: tepsi menüsünde **Quit Tune** ya da **Settings** › **Start-up** altındaki
+  **Quit Tune** düğmesi.
 - Deneme sırasında `ssgg` komutu çalıştırma; fareyle aynı anda iki program konuşmasın.
 
 ## 0. Yayın sürümünü derle
@@ -74,7 +78,8 @@ Dosyaya bak:
 cat ~/.config/autostart/local.tune.desktop
 ```
 
-**Bak:** içinde `Exec="/home/pc/repolar/tune/target/release/tune" --background` satırı var.
+**Bak:** içinde `Exec="/home/pc/repolar/tune/target/release/tune" --background` satırı var. Dosya yoksa `cat`
+"Böyle bir dosya ya da dizin yok" der; o zaman bunu not al.
 
 ## 6. Oturumu kapatıp aç (isteğe bağlı)
 
@@ -96,8 +101,16 @@ pgrep -af '[t]arget/release/[t]une'
 
 **Bak:** hiçbir şey yazmaz.
 
-Oturum açılınca başlamayı istemiyorsan Tune'u yeniden aç, **Settings** › **Start-up** › **Start at login** › **Off**
-yap. 5. adımdaki `cat` komutu artık "No such file" der.
+Oturum açılınca başlamayı istemiyorsan yayın sürümünü yeniden aç:
+
+```bash
+~/repolar/tune/target/release/tune
+```
+
+**Settings** › **Start-up** › **Start at login** › **Off** yap. 5. adımdaki `cat` komutu artık "Böyle bir dosya ya da
+dizin yok" der. Sonra aynı bölümdeki **Quit Tune** düğmesine bas. **Bak:** pencere kapanır, tepsi simgesi de gider.
+
+Bundan sonra günlük kullanımda `npm run app` yine çalışır; tepside Tune kalmadığı için yeni sürüm açılır.
 
 ## Bana gönder
 
@@ -109,6 +122,6 @@ Tepsi denemesi
 4. Türkçe menü:
 5. Start at login dosyası:
 6. Oturum açılınca (yaptıysan):
-7. Quit sonrası pgrep:
+7. Quit sonrası pgrep:          Settings'teki Quit düğmesi:
 Garip bir şey oldu mu:
 ```
