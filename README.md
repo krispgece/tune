@@ -10,7 +10,8 @@ Unofficial. Not affiliated with or endorsed by SteelSeries; see the [legal notic
 
 Phase 1: the app's screens are built and also run on fake devices. With a wired Rival 3 Gen 2 the app sends DPI
 stages, the polling rate and the lighting (one colour, by zone or off), and shows what the mouse answered. These were
-tried on one mouse in the Phase 0 hardware test (`docs/`).
+tried on one mouse, first by hand in the Phase 0 hardware test and then from the app in the Phase 1 try-out
+(2026-11-23, `docs/`). Sending again after the computer wakes from sleep was not tried on the mouse.
 
 - First supported device: the wired Rival 3 Gen 2. Other SteelSeries devices that ssgg recognizes show up as "Not
   supported yet", and nothing is sent to them.
