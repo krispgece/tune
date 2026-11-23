@@ -6,11 +6,14 @@
 
 pub mod access;
 pub mod adapter;
+pub mod autostart;
 pub mod backend;
 pub mod error;
 pub mod mock;
 pub mod model;
 pub mod settings;
+#[cfg(unix)]
+pub mod single_instance;
 pub mod sleep;
 
 pub use backend::{Backend, BackendKind};

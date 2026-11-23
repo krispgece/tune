@@ -26,6 +26,14 @@ pub enum Error {
     DeviceGone,
     #[error("could not send the setting: {0}")]
     Send(String),
+    #[error("could not change {path}: {source}")]
+    Autostart {
+        path: PathBuf,
+        #[source]
+        source: std::io::Error,
+    },
+    #[error("starting at login is not available in this build")]
+    AutostartUnavailable,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
