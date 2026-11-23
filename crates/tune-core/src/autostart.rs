@@ -1,5 +1,6 @@
-//! Starting the app when the user logs in, through an XDG autostart entry (`~/.config/autostart/<app id>.desktop`)
-//! that starts it with [`BACKGROUND_ARG`]: in the tray, with no window, so it can send the mouse its settings.
+//! Starting the app when the user logs in, through an XDG autostart entry named after the app id
+//! (`~/.config/autostart/local.tune.desktop`) that starts it with [`BACKGROUND_ARG`]: in the tray, with no window, so
+//! it can send the mouse its settings.
 
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
@@ -45,13 +46,14 @@ impl Autostart {
         Self::Memory(Mutex::new(false))
     }
 
-    /// `$XDG_CONFIG_HOME/autostart/<app id>.desktop`, or the same under `~/.config`.
+    /// `$XDG_CONFIG_HOME/autostart/<app id>.desktop`, or the same under `~/.config`; an app id that already ends in
+    /// `.desktop` is the file name as it is.
     pub fn entry_path(app_id: &str) -> Option<PathBuf> {
         let config = std::env::var_os("XDG_CONFIG_HOME")
             .map(PathBuf::from)
             .filter(|dir| dir.is_absolute())
             .or_else(|| std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".config")))?;
-        Some(config.join("autostart").join(format!("{app_id}.desktop")))
+        Some(config.join("autostart").join(entry_file_name(app_id)))
     }
 
     pub fn status(&self) -> AutostartStatus {
@@ -84,6 +86,14 @@ impl Autostart {
             Self::Memory(stored) => *stored.lock().unwrap_or_else(PoisonError::into_inner) = enabled,
         }
         Ok(self.status())
+    }
+}
+
+fn entry_file_name(app_id: &str) -> String {
+    if app_id.ends_with(".desktop") {
+        app_id.to_owned()
+    } else {
+        format!("{app_id}.desktop")
     }
 }
 
@@ -183,6 +193,12 @@ mod tests {
         // Removing an entry that is already gone is fine.
         assert!(!autostart.set(false)?.enabled);
         Ok(())
+    }
+
+    #[test]
+    fn the_entry_file_has_one_desktop_suffix() {
+        assert_eq!(entry_file_name("local.tune.desktop"), "local.tune.desktop");
+        assert_eq!(entry_file_name("org.example.tune"), "org.example.tune.desktop");
     }
 
     #[test]
