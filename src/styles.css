@@ -555,6 +555,10 @@ ol {
   color: var(--on-accent);
 }
 
+.segmented > button:disabled {
+  opacity: 0.45;
+}
+
 .segmented.numbers > button {
   align-items: baseline;
   padding: 12px 4px;

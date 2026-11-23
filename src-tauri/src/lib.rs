@@ -5,8 +5,9 @@
 //! real settings file or the login items.
 //!
 //! The app lives in the tray: closing the window hides it, so the app keeps sending settings when the mouse is plugged
-//! in or the computer wakes, until Quit in the tray menu. With `--background` (how the login entry starts it) the window
-//! stays hidden. Only one copy runs; a second start shows the first one's window and ends.
+//! in or the computer wakes, until Quit (in the tray menu or in Settings). With `--background` (how the login entry
+//! starts it) the window stays hidden. Only one copy runs; a second start shows the first one's window and ends. Where
+//! the tray icon cannot be made (no appindicator library), closing the window quits the app as before.
 
 use std::path::PathBuf;
 
@@ -22,6 +23,11 @@ use tune_core::mock::MockBackend;
 use tune_core::model::{ActionOutcome, ApplyOutcome, ScanReport, Scenario, SettingGroup};
 use tune_core::settings::{DeviceSettings, Settings, SettingsStore};
 use tune_core::{Backend, BackendKind};
+
+/// The name of this copy's single-copy lock and of its tray icon, so the real app and the mock never share either.
+fn copy_name(mock: bool) -> &'static str {
+    if mock { "tune-mock" } else { "tune" }
+}
 
 /// The access rule among the app's resources; `bundle.resources` in `tauri.conf.json` puts it there.
 const BUNDLED_RULE: &str = "udev/70-tune-rival3-gen2.rules";
@@ -172,6 +178,12 @@ fn set_tray_texts(app: AppHandle, open: String, quit: String) -> CommandResult<(
     tray.quit.set_text(quit).map_err(|e| e.to_string())
 }
 
+/// Ends the app, tray icon included: the window's own way out, also where the desktop shows no tray icons.
+#[tauri::command]
+fn quit_app(app: AppHandle) {
+    app.exit(0);
+}
+
 #[tauri::command]
 fn access_rule(app: AppHandle) -> AccessRuleInfo {
     let source = app
@@ -197,12 +209,12 @@ fn show_main_window(app: &AppHandle) {
     }
 }
 
-fn build_tray(app: &App) -> tauri::Result<Tray> {
+fn build_tray(app: &App, id: &str) -> tauri::Result<Tray> {
     let name = app.package_info().name.clone();
     let open = MenuItem::with_id(app, TRAY_OPEN, format!("Open {name}"), true, None::<&str>)?;
     let quit = MenuItem::with_id(app, TRAY_QUIT, format!("Quit {name}"), true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&open, &PredefinedMenuItem::separator(app)?, &quit])?;
-    let mut tray = TrayIconBuilder::with_id(MAIN_WINDOW)
+    let mut tray = TrayIconBuilder::with_id(id)
         .menu(&menu)
         .tooltip(&name)
         .on_menu_event(|app, event| match event.id().as_ref() {
@@ -240,8 +252,7 @@ fn claim_instance(app_id: &str, mock: bool) -> Option<tune_core::single_instance
     if !dir.is_absolute() {
         return None;
     }
-    let name = if mock { "tune-mock" } else { "tune" };
-    match tune_core::single_instance::claim(&dir.join(app_id), name) {
+    match tune_core::single_instance::claim(&dir.join(app_id), copy_name(mock)) {
         Ok(instance) => Some(instance),
         Err(error) => {
             eprintln!("could not check for another running copy: {error}");
@@ -290,13 +301,20 @@ pub fn run() {
                 }
             };
             app.manage(state);
-            let tray = match build_tray(app) {
-                Ok(tray) => {
+            // The Linux tray loads its appindicator library on first use and panics when it is missing; the app then
+            // runs without a tray instead of ending.
+            let built = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| build_tray(app, copy_name(mock))));
+            let tray = match built {
+                Ok(Ok(tray)) => {
                     app.manage(tray);
                     true
                 }
-                Err(error) => {
+                Ok(Err(error)) => {
                     eprintln!("could not add the tray icon: {error}");
+                    false
+                }
+                Err(_) => {
+                    eprintln!("could not add the tray icon: no usable appindicator library");
                     false
                 }
             };
@@ -341,6 +359,7 @@ pub fn run() {
             autostart_status,
             set_autostart,
             set_tray_texts,
+            quit_app,
         ])
         .run(context);
 

@@ -207,9 +207,10 @@ export const en = {
   switchOn: 'On',
   startupText: '{app} starts in the tray when you log in, without its window, and sends your colour and polling rate to the mouse.',
   startupDev: "This development build can't start at login; the release build of {app} can.",
+  startupDevOn: 'A release build of {app} starts at login. This development build can only turn that off.',
   startupFailed: "{app} couldn't change this. Try again.",
   trayText:
-    'Closing the window keeps {app} running in the tray, so it still sends your settings when the mouse is plugged in. To stop it, choose Quit {app} in the tray menu.',
+    'Closing the window keeps {app} running in the tray, so it still sends your settings when the mouse is plugged in. To stop it, use the button below or Quit {app} in the tray menu.',
   trayOpen: 'Open {app}',
   trayQuit: 'Quit {app}',
   privacy: 'Privacy',

@@ -17,4 +17,5 @@ export const tauriBackend: Backend = {
   autostartStatus: () => invoke('autostart_status'),
   setAutostart: (enabled) => invoke('set_autostart', { enabled }),
   setTrayTexts: (open, quit) => invoke('set_tray_texts', { open, quit }),
+  quit: () => invoke('quit_app'),
 };

@@ -23,6 +23,7 @@ describe('browser mock', () => {
     expect(await mock.setAutostart(true)).toEqual({ available: true, enabled: true });
     expect((await mock.autostartStatus()).enabled).toBe(true);
     await mock.setTrayTexts('Open', 'Quit');
+    await mock.quit();
   });
 
   it('grants access and leaves the mouse its own settings', async () => {

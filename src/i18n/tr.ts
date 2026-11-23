@@ -210,9 +210,10 @@ export const tr: Strings = {
   switchOn: 'Açık',
   startupText: '{app} oturum açılınca penceresiz olarak tepside başlar ve renk ile rapor hızını fareye gönderir.',
   startupDev: "Bu geliştirme sürümü oturum açılınca başlayamaz; {app}'un yayın sürümü başlayabilir.",
+  startupDevOn: "{app}'un yayın sürümü oturum açılınca başlıyor. Bu geliştirme sürümü bunu yalnızca kapatabilir.",
   startupFailed: '{app} bunu değiştiremedi. Yeniden dene.',
   trayText:
-    "Pencereyi kapatınca {app} tepside çalışmaya devam eder; fare takılınca ayarlarını yine gönderir. Tamamen kapatmak için tepsi menüsünde \"{app}'dan çık\" seçeneğini kullan.",
+    "Pencereyi kapatınca {app} tepside çalışmaya devam eder; fare takılınca ayarlarını yine gönderir. Tamamen kapatmak için aşağıdaki düğmeyi ya da tepsi menüsünde \"{app}'dan çık\" seçeneğini kullan.",
   trayOpen: "{app}'u aç",
   trayQuit: "{app}'dan çık",
   privacy: 'Gizlilik',

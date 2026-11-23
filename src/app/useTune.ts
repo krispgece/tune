@@ -469,6 +469,8 @@ export function useTune(backend: Backend) {
     }
   };
 
+  const quit = () => backend.quit().catch((e: unknown) => console.error('Quitting failed:', e));
+
   const retry = async () => {
     try {
       await backend.resumeReapply();
@@ -539,6 +541,7 @@ export function useTune(backend: Backend) {
     stopManaging,
     retry,
     setAutostart,
+    quit,
     keepOff: () => setGuardHidden(true),
     applyScenario,
   };

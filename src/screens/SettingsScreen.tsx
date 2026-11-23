@@ -65,7 +65,8 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
               labelledBy="login-label"
               value={tune.autostart?.enabled ? 'on' : 'off'}
               onChange={(value) => void tune.setAutostart(value === 'on')}
-              disabled={!tune.autostart?.available}
+              // A build that can't start at login can still turn off an entry another build left.
+              disabled={!tune.autostart || (!tune.autostart.available && !tune.autostart.enabled)}
               style={{ flex: '0 1 200px' }}
               options={[
                 { value: 'off', label: t('switchOff') },
@@ -73,13 +74,28 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
               ]}
             />
           </div>
-          <p className="cell small-2">{t(tune.autostart?.available === false ? 'startupDev' : 'startupText')}</p>
+          <p className="cell small-2">
+            {t(
+              tune.autostart?.available !== false
+                ? 'startupText'
+                : tune.autostart.enabled
+                  ? 'startupDevOn'
+                  : 'startupDev',
+            )}
+          </p>
           {tune.autostartFailed && (
             <p className="cell small-2" role="alert">
               {t('startupFailed')}
             </p>
           )}
-          {tune.info?.tray && <p className="cell small-2">{t('trayText')}</p>}
+          {tune.info?.tray && (
+            <div className="cell stack" style={{ alignItems: 'flex-start' }}>
+              <p className="small-2">{t('trayText')}</p>
+              <button type="button" className="btn" onClick={() => void tune.quit()}>
+                {t('trayQuit')}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

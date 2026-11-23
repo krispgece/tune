@@ -137,5 +137,8 @@ export class BrowserMock implements Backend {
     return this.autostartStatus();
   }
 
-  async setTrayTexts() {}
+  async setTrayTexts(_open: string, _quit: string) {}
+
+  /** A browser tab has no app to end. */
+  async quit() {}
 }

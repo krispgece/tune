@@ -129,4 +129,6 @@ export interface Backend {
   setAutostart(enabled: boolean): Promise<AutostartStatus>;
   /** The tray menu's texts, in the interface language. */
   setTrayTexts(open: string, quit: string): Promise<void>;
+  /** Ends the app, tray icon included. */
+  quit(): Promise<void>;
 }
