@@ -14,13 +14,15 @@ tauri-build = { version = "2.7.5", features = [] }
 
 [dependencies]
 serde.workspace = true
-# Default features minus `dbus` (taskbar badges only), which would need libdbus-1-dev to build.
+# Default features minus `dbus` (taskbar badges only), which would need libdbus-1-dev to build. `tray-icon` adds the
+# tray; on Linux it loads libayatana-appindicator3 at run time, and builds without its -dev package.
 tauri = { version = "2.12.6", default-features = false, features = [
     "wry",
     "compression",
     "common-controls-v6",
     "dynamic-acl",
     "x11",
+    "tray-icon",
 ] }
 tune-core.workspace = true
 
