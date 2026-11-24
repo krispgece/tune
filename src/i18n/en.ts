@@ -230,6 +230,9 @@ export const en = {
   legal3:
     'All trademarks, logos, product names, product images, designs and other intellectual and industrial property rights mentioned here belong to their respective owners. Product names appear only to identify compatible devices. {app} uses no SteelSeries logos or product images. It is not SteelSeries GG and does not include any part of it.',
   legal4: "{app} changes device settings without the manufacturer's software or support. Use it at your own risk.",
+  licenseTitle: 'License',
+  appLicense:
+    '{app} is free software: you can share and change it under the GNU General Public License (GPL), version 3 or any later version. It comes with no warranty. Whoever shares a changed version, or a program that includes its code, has to share it under the same license, with its source code.',
   creditsTitle: 'Credits',
   credits:
     '{app} talks to devices through steelseriesgg-rs (ssgg), developed by Ven0m0 and started by ScepticDope, used under the MIT License (Copyright (c) 2024 ScepticDope): github.com/Ven0m0/steelseriesgg-rs. Thank you.',

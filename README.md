@@ -89,3 +89,13 @@ Tune changes device settings without the manufacturer's software or support. Use
 
 Tune talks to devices through [steelseriesgg-rs](https://github.com/Ven0m0/steelseriesgg-rs) (ssgg), developed by
 Ven0m0 and started by ScepticDope, used under the MIT License (Copyright (c) 2024 ScepticDope). Thank you.
+
+## License
+
+Tune is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+It comes with no warranty. The full text is in [LICENSE](LICENSE).
+
+Whoever shares a changed version of Tune, or a program that includes its code, has to share it under the same
+license, with its source code. The libraries and fonts Tune uses keep their own licenses (see Credits, and Open-source
+licenses in the app's Settings).

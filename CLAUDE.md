@@ -97,5 +97,8 @@ vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune
   which keep the choice in memory; never turn it on in a real-backend run yourself.
 - **udev rule.** hidraw of the one settings interface only, `TAG+="uaccess"`, no `GROUP`/`MODE`, numbered below 73;
   check it with `udevadm verify`.
+- **License.** GPL-3.0-or-later: `LICENSE`, the `license` fields in `Cargo.toml` and `package.json`, the README
+  section and the About screen (English and Turkish). A new dependency must be GPL-3.0-compatible: no GPL-2.0-only,
+  no proprietary or source-unavailable code.
 - **Publishing.** No GitHub repository, push or release without the owner's explicit go-ahead.
 - **Commits.** Conventional Commits.
