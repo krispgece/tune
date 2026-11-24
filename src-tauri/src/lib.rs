@@ -21,6 +21,7 @@ use tune_core::adapter::SsggBackend;
 use tune_core::autostart::{Autostart, AutostartStatus, BACKGROUND_ARG};
 use tune_core::mock::MockBackend;
 use tune_core::model::{ActionOutcome, ApplyOutcome, ScanReport, Scenario, SettingGroup};
+use tune_core::previous_id::{IdPaths, Moved, PREVIOUS_APP_ID};
 use tune_core::settings::{DeviceSettings, Settings, SettingsStore};
 use tune_core::{Backend, BackendKind};
 
@@ -261,6 +262,74 @@ fn claim_instance(app_id: &str, mock: bool) -> Option<tune_core::single_instance
     }
 }
 
+/// Moves the settings folder and the login entry of a copy that ran under the previous app id; a failure leaves them
+/// where they are, and the app starts with fresh settings.
+fn move_from_previous_id(config: &std::path::Path, app_id: &str) -> Moved {
+    let Some(parent) = config.parent().filter(|_| app_id != PREVIOUS_APP_ID) else {
+        return Moved::default();
+    };
+    let previous = IdPaths {
+        settings_dir: parent.join(PREVIOUS_APP_ID),
+        login_entry: Autostart::entry_path(PREVIOUS_APP_ID),
+    };
+    let current = IdPaths {
+        settings_dir: config.to_owned(),
+        login_entry: Autostart::entry_path(app_id),
+    };
+    match tune_core::previous_id::move_over(&previous, &current) {
+        Ok(moved) => {
+            if moved.settings || moved.login_entry {
+                eprintln!("moved the settings and login entry of the previous app id ({PREVIOUS_APP_ID}): {moved:?}");
+            }
+            moved
+        }
+        Err(error) => {
+            eprintln!("could not move the previous app id's settings: {error}");
+            Moved::default()
+        }
+    }
+}
+
+/// A login entry moved from the previous id still starts the program that wrote it, which may be a build under that id
+/// and would find no settings there. A release build points the entry at itself; a development build cannot.
+fn point_login_entry_here(autostart: &Autostart) {
+    let status = autostart.status();
+    if !status.enabled {
+        return;
+    }
+    if !status.available {
+        eprintln!(
+            "the login entry still starts the program that wrote it; start a release build of this version once \
+             before the next login"
+        );
+    } else if let Err(error) = autostart.set(true) {
+        eprintln!("could not point the login entry at this program: {error}");
+    }
+}
+
+/// A copy started under the previous app id holds a lock of its own, which the single-copy check does not see; two
+/// copies would both send settings. When one runs, it is asked to show its window (where it can be quit) and this
+/// start ends.
+#[cfg(unix)]
+fn previous_copy_runs(app_id: &str, mock: bool) -> bool {
+    if app_id == PREVIOUS_APP_ID {
+        return false;
+    }
+    let Some(dir) = std::env::var_os("XDG_RUNTIME_DIR")
+        .map(PathBuf::from)
+        .filter(|dir| dir.is_absolute())
+    else {
+        return false;
+    };
+    match tune_core::single_instance::ask_holder(&dir.join(PREVIOUS_APP_ID), copy_name(mock)) {
+        Ok(holder) => holder.is_some(),
+        Err(error) => {
+            eprintln!("could not check for a copy of the previous version: {error}");
+            false
+        }
+    }
+}
+
 pub fn run() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let mock =
@@ -268,6 +337,15 @@ pub fn run() {
     let background = args.iter().any(|arg| arg == BACKGROUND_ARG);
     let context = tauri::generate_context!();
     let app_id = context.config().identifier.clone();
+
+    #[cfg(unix)]
+    if previous_copy_runs(&app_id, mock) {
+        let name = &context.package_info().name;
+        eprintln!(
+            "An earlier version of {name} is still running; quit it from its tray menu, then start {name} again."
+        );
+        return;
+    }
 
     #[cfg(unix)]
     let mut first = match claim_instance(&app_id, mock) {
@@ -294,10 +372,15 @@ pub fn run() {
                 }
             } else {
                 let config = app.path().app_config_dir()?;
+                let moved = move_from_previous_id(&config, &app_id);
+                let autostart = autostart_for(app, &app_id);
+                if moved.login_entry {
+                    point_login_entry_here(&autostart);
+                }
                 AppState {
                     backend: Box::new(SsggBackend::with_pause_file(config.join(PAUSE_FILE))),
                     store: SettingsStore::file(config.join("settings.json")),
-                    autostart: autostart_for(app, &app_id),
+                    autostart,
                 }
             };
             app.manage(state);

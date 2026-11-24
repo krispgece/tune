@@ -54,6 +54,26 @@ pub fn claim(dir: &Path, name: &str) -> std::io::Result<Instance> {
     }
 }
 
+/// Whether an app holds `<dir>/<name>.lock`, without claiming it: `None` when none does, else whether the holder got
+/// the request to show its window.
+pub fn ask_holder(dir: &Path, name: &str) -> std::io::Result<Option<bool>> {
+    let lock = match OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(dir.join(format!("{name}.lock")))
+    {
+        Ok(lock) => lock,
+        Err(e) if e.kind() == ErrorKind::NotFound => return Ok(None),
+        Err(e) => return Err(e),
+    };
+    match lock.try_lock() {
+        // Free: closing the file below lets it go again.
+        Ok(()) => Ok(None),
+        Err(TryLockError::WouldBlock) => Ok(Some(ask_to_show(&dir.join(format!("{name}.sock"))))),
+        Err(TryLockError::Error(e)) => Err(e),
+    }
+}
+
 fn ask_to_show(socket: &Path) -> bool {
     for _ in 0..REACH_TRIES {
         if let Ok(mut stream) = UnixStream::connect(socket) {
@@ -110,6 +130,28 @@ mod tests {
         requests.recv_timeout(Duration::from_secs(5))?;
         // The mock app runs apart from the real one.
         assert!(matches!(claim(dir.path(), "tune-mock")?, Instance::First(_)));
+        Ok(())
+    }
+
+    #[test]
+    fn a_holder_is_found_without_claiming_its_lock() -> TestResult {
+        let dir = tempfile::tempdir()?;
+        assert_eq!(ask_holder(dir.path(), "tune")?, None);
+        let Instance::First(primary) = claim(dir.path(), "tune")? else {
+            return Err("the first start should own the lock".into());
+        };
+        let (shown, requests) = mpsc::channel();
+        primary.serve(move || {
+            let _ = shown.send(());
+        })?;
+        assert_eq!(ask_holder(dir.path(), "tune")?, Some(true));
+        requests.recv_timeout(Duration::from_secs(5))?;
+
+        // A lock file nobody holds does not count, and checking it leaves it free.
+        let other = tempfile::tempdir()?;
+        drop(claim(other.path(), "tune")?);
+        assert_eq!(ask_holder(other.path(), "tune")?, None);
+        assert!(matches!(claim(other.path(), "tune")?, Instance::First(_)));
         Ok(())
     }
 

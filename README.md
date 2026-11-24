@@ -54,14 +54,15 @@ npm run dev          # the interface alone in a browser (http://localhost:1420),
 
 Starting at login works with the release build only: a development build loads its interface from the dev server,
 which does not run then. Start `target/release/tune` and turn on Settings › Start-up › Start at login. That writes
-`~/.config/autostart/local.tune.desktop`, which starts the same program with `--background`; turning the switch off
-removes the file. The fake devices keep this choice in memory too.
+`~/.config/autostart/io.github.krispgece.tune.desktop`, which starts the same program with `--background`; turning
+the switch off removes the file. The fake devices keep this choice in memory too.
 
 With fake devices, a bar at the top switches between the situations the app handles (first launch, several devices,
-mouse unplugged, no permission, and so on). The app keeps its settings in `~/.config/local.tune.desktop/`; the fake
-devices keep theirs in memory only.
+mouse unplugged, no permission, and so on). The app keeps its settings in `~/.config/io.github.krispgece.tune/`; the
+fake devices keep theirs in memory only.
 
-Tests: `npm test` and `cargo test --locked`.
+Tests: `npm test` and `cargo test --locked`. After changing dependencies, run `npm run notices` to update
+`THIRD-PARTY-NOTICES.txt`; `npm run notices:check` fails while it is out of date.
 
 ## Contents
 
@@ -69,6 +70,7 @@ Tests: `npm test` and `cargo test --locked`.
 - `src-tauri/`: the desktop shell (Tauri 2): the window, the tray icon and the commands the interface calls.
 - `crates/tune-core/`: the adapter to the ssgg library, the fake devices, the settings file, the login entry and the
   single-copy lock.
+- `scripts/third-party-notices.mjs`: writes `THIRD-PARTY-NOTICES.txt` (`npm run notices`).
 - `packaging/linux/`: a udev rule that gives the user signed in at the computer access to the mouse's settings
   interface only.
 
@@ -100,5 +102,6 @@ published by the Free Software Foundation, either version 3 of the License, or (
 It comes with no warranty. The full text is in [LICENSE](LICENSE).
 
 Whoever shares a changed version of Tune, or a program that includes its code, has to share it under the same
-license, with its source code. The libraries and fonts Tune uses keep their own licenses (see Credits, and Open-source
-licenses in the app's Settings).
+license, with its source code. The libraries and fonts Tune uses keep their own licenses: their texts are in
+[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), and the app shows both files under Settings › About ›
+Open-source licenses.

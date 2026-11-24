@@ -26,7 +26,8 @@ Rival 3 Gen 2 the app sends DPI stages, polling rate and lighting. Installing or
 - The app lives in the tray: closing the window hides it and the re-sends go on; Quit (tray menu, or Settings ›
   Start-up) ends it. Without an appindicator library the tray build panics inside the library; the shell catches that
   and runs with no tray, where closing the window quits. `--background` starts it with the window hidden, which is how
-  the login entry (`~/.config/autostart/local.tune.desktop`, named after the app id, release builds only) starts it.
+  the login entry (`~/.config/autostart/io.github.krispgece.tune.desktop`, named after the app id, release builds
+  only) starts it.
   One copy runs at a time: a lock and a socket in `$XDG_RUNTIME_DIR/<app id>/` (`tune.*`, `tune-mock.*` for the mock;
   the tray icon's id uses the same name); a second start asks the first to show its window and ends.
 
@@ -36,6 +37,7 @@ Rival 3 Gen 2 the app sends DPI stages, polling rate and lighting. Installing or
 crates/tune-core/   adapter.rs (the only module that calls steelseries_gg: device list, sending, re-apply pause),
                     mock.rs (fake devices and situations), settings.rs (settings file), access.rs (udev rule name,
                     node access, which plug-in a node belongs to), autostart.rs (login entry),
+                    previous_id.rs (moves what the pre-release app id left),
                     single_instance.rs (one copy at a time)
 src-tauri/          the window, the tray and the commands the interface calls; picks the mock with --mock or
                     TUNE_BACKEND=mock
@@ -55,7 +57,8 @@ docs/               local try-out guides (Turkish), not tracked: listed in `.git
 | Interface in a browser, in-page fake devices | `npm run dev` (port 1420) |
 | Release binary | `npm run app:release` (`target/release/tune`) |
 | Tests | `npm test`, `cargo test --locked` |
-| Checks | `npm run check`, `cargo fmt --all -- --check`, `cargo clippy --all-targets --locked -- -D warnings` |
+| Checks | `npm run check`, `npm run notices:check`, `cargo fmt --all -- --check`, `cargo clippy --all-targets --locked -- -D warnings` |
+| Third-party notices | `npm run notices` (after any dependency change; writes `THIRD-PARTY-NOTICES.txt`) |
 
 Building `src-tauri` needs `libwebkit2gtk-4.1-dev` (it pulls in GTK 3 and libsoup 3). The in-page mock
 (`src/backend/browserMock.ts`) mirrors `crates/tune-core/src/mock.rs`; change both together.
@@ -67,6 +70,9 @@ Building `src-tauri` needs `libwebkit2gtk-4.1-dev` (it pulls in GTK 3 and libsou
 `{app}` instead of the name, and a test fails on a literal "Tune" in them. After a rename, check the Turkish
 strings with a suffix after `{app}` (`{app}'a`, `{app}'u`, `{app}'un`): the suffix must follow the new name's
 vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune-rival3-gen2.rules`) may stay.
+Keep the identifier (`io.github.krispgece.tune`) through a rename: it names the settings folder, the login entry and
+the single-copy lock folder. It replaced the pre-release `local.tune.desktop`; `previous_id.rs` moves what that id
+left on first start, and a release build then points a moved login entry at itself.
 
 ## Rules
 
@@ -98,8 +104,9 @@ vowel harmony. Internal names (crate `tune`, `tune-core`, the rule file `70-tune
   which keep the choice in memory; never turn it on in a real-backend run yourself.
 - **udev rule.** hidraw of the one settings interface only, `TAG+="uaccess"`, no `GROUP`/`MODE`, numbered below 73;
   check it with `udevadm verify`.
-- **License.** GPL-3.0-or-later: `LICENSE`, the `license` fields in `Cargo.toml` and `package.json`, the README
-  section and the About screen (English and Turkish). A new dependency must be GPL-3.0-compatible: no GPL-2.0-only,
-  no proprietary or source-unavailable code.
+- **License.** GPL-3.0-or-later: `LICENSE`, the `license` fields in `Cargo.toml` and `package.json`, the bundle
+  fields in `tauri.conf.json`, the README section and the About screen (English and Turkish). A new dependency must
+  be GPL-3.0-compatible: no GPL-2.0-only, no proprietary or source-unavailable code. `THIRD-PARTY-NOTICES.txt`
+  ships with the app (bundle resource, and the About screen loads it): regenerate it after every dependency change.
 - **Publishing.** No GitHub repository, push or release without the owner's explicit go-ahead.
 - **Commits.** Conventional Commits.

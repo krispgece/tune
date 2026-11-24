@@ -7,9 +7,16 @@ import { Button, LanguagePicker, Segmented } from '../components/ui';
 import { removeCommands, RULE_FILE_NAME } from '../state/commands';
 import { installLines, PermMessage, ReplugHelp, Waiting } from './Access';
 
+type LicenseView = { which: 'gpl' | 'thirdParty'; text: string | null };
+
+// Loaded on demand: the two texts are long (the third-party one about half a megabyte).
+const loadLicense = (which: LicenseView['which']) =>
+  (which === 'gpl' ? import('../../LICENSE?raw') : import('../../THIRD-PARTY-NOTICES.txt?raw')).then((m) => m.default);
+
 export function SettingsScreen({ tune }: { tune: Tune }) {
   const { t } = tune.i18n;
   const [licenses, setLicenses] = useState(false);
+  const [licenseView, setLicenseView] = useState<LicenseView | null>(null);
   const installedRule = tune.scan?.accessRule ?? null;
   const fileName = tune.rule?.fileName ?? RULE_FILE_NAME;
   const showInstall =
@@ -17,6 +24,11 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
   const accessText = tune.accessAllowed ? 'accessOn' : tune.replug ? 'accessPending' : 'accessOff';
   const removeLines = removeCommands(installedRule, fileName);
   const installCommandLines = installLines(tune);
+  const showLicense = (which: LicenseView['which']) => {
+    setLicenseView({ which, text: null });
+    const settle = (text: string) => setLicenseView((view) => (view?.which === which ? { which, text } : view));
+    loadLicense(which).then(settle, () => settle(''));
+  };
 
   return (
     <div className="stack stack-20">
@@ -208,9 +220,27 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
               <span>{t('licenses')}</span>
               <ChevronDown aria-hidden size={16} className="chevron" />
             </button>
-            <p id="licenses-text" className="small-2" hidden={!licenses}>
-              {t('licensesText')}
-            </p>
+            <div id="licenses-text" className="stack stack-12" style={{ alignSelf: 'stretch' }} hidden={!licenses}>
+              <p className="small-2">{t('licensesText')}</p>
+              <div className="row-wrap" style={{ gap: 8 }}>
+                <Button aria-pressed={licenseView?.which === 'gpl'} onClick={() => showLicense('gpl')}>
+                  {t('showGpl')}
+                </Button>
+                <Button aria-pressed={licenseView?.which === 'thirdParty'} onClick={() => showLicense('thirdParty')}>
+                  {t('showThirdParty')}
+                </Button>
+              </div>
+              {licenseView && (
+                <pre
+                  key={licenseView.which}
+                  className="license-text"
+                  tabIndex={0}
+                  aria-label={t(licenseView.which === 'gpl' ? 'showGpl' : 'showThirdParty')}
+                >
+                  {licenseView.text === null ? t('licenseLoading') : licenseView.text || t('licenseLoadFailed')}
+                </pre>
+              )}
+            </div>
           </div>
         </div>
       </section>

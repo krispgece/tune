@@ -11,6 +11,7 @@ pub mod backend;
 pub mod error;
 pub mod mock;
 pub mod model;
+pub mod previous_id;
 pub mod settings;
 #[cfg(unix)]
 pub mod single_instance;

@@ -240,6 +240,10 @@ export const tr: Strings = {
   credits:
     '{app} cihazlarla steelseriesgg-rs (ssgg) kütüphanesi üzerinden konuşur. Kütüphaneyi Ven0m0 geliştiriyor, ScepticDope başlattı; MIT Lisansı ile kullanılıyor (Copyright (c) 2024 ScepticDope): github.com/Ven0m0/steelseriesgg-rs. Teşekkürler.',
   licenses: 'Açık kaynak lisansları',
+  showGpl: 'GPL metnini göster',
+  showThirdParty: 'Üçüncü taraf lisanslarını göster',
+  licenseLoading: 'Yükleniyor…',
+  licenseLoadFailed: 'Metin yüklenemedi.',
   licensesText:
     'ssgg (MIT), Tauri (MIT veya Apache 2.0), React (MIT), Lucide simgeleri (ISC), Inter ve Space Grotesk yazı tipleri (SIL Open Font License 1.1) ve diğer açık kaynak bileşenler.',
 

@@ -1,5 +1,5 @@
 //! Starting the app when the user logs in, through an XDG autostart entry named after the app id
-//! (`~/.config/autostart/local.tune.desktop`) that starts it with [`BACKGROUND_ARG`]: in the tray, with no window, so
+//! (`~/.config/autostart/<app id>.desktop`) that starts it with [`BACKGROUND_ARG`]: in the tray, with no window, so
 //! it can send the mouse its settings.
 
 use std::io::ErrorKind;

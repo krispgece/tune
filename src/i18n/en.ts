@@ -237,6 +237,10 @@ export const en = {
   credits:
     '{app} talks to devices through steelseriesgg-rs (ssgg), developed by Ven0m0 and started by ScepticDope, used under the MIT License (Copyright (c) 2024 ScepticDope): github.com/Ven0m0/steelseriesgg-rs. Thank you.',
   licenses: 'Open-source licenses',
+  showGpl: 'Show the GPL text',
+  showThirdParty: 'Show the third-party licenses',
+  licenseLoading: 'Loading…',
+  licenseLoadFailed: 'The text could not be loaded.',
   licensesText:
     'ssgg (MIT), Tauri (MIT or Apache 2.0), React (MIT), Lucide icons (ISC), the Inter and Space Grotesk fonts (SIL Open Font License 1.1) and other open-source components.',
 
