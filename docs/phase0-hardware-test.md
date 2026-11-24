@@ -31,17 +31,19 @@ Her adımda şu başlıklar var:
 
 ## Başlamadan
 
-- **Fareye ne gönderiyoruz?** Yalnızca ayar komutları; "kalıcı kaydet" komutu hiç gönderilmiyor. Bu yüzden fareyi
-  çıkarıp taktığında kendi ayarlarına dönmesini bekliyoruz. 7. adım bunu deniyor.
-- **Geri alma:** fareyi USB'den çıkar, 5 saniye bekle, geri tak. Bu, testteki bütün ayarları geri almalı.
+- **Fareye ne gönderiyoruz?** Yalnızca ayar komutları; "kalıcı kaydet" komutu hiç gönderilmiyor. Yine de fare DPI
+  ayarını kendisi saklıyor: ilk testinde (17-18 Kasım) fareyi çıkarıp taktığında DPI kaldı, renk ve rapor hızı
+  farenin kendi ayarlarına döndü. Bu yüzden DPI komutları `--yes` ile bitiyor. Farenin önceki DPI kademeleri
+  okunamıyor; DPI'yı ancak istediğin değeri yeniden yazarak değiştirebilirsin.
+- **Geri alma:** fareyi USB'den çıkar, 5 saniye bekle, geri tak. Bu, renk ve rapor hızını geri alır, DPI'yı almaz.
 - **Fare doğrudan bilgisayara takılı olsun:** USB çoğaltıcıya ya da klavyedeki USB girişine değil.
 - **Terminal:** `Ctrl+Alt+T` ile aç. Komutları kopyalayabilmek için bu rehberi bilgisayarda da aç. Rehber bu
   bilgisayarda `~/repolar/tune/docs/phase0-hardware-test.md` dosyasında. Komut kutularını görmek için onu Claude
   uygulamasında aç. Kate gibi bir metin düzenleyicide kutuların yerine `` ``` `` satırları görünür; onlar komutun
   parçası değil, kopyalama.
 - **İngilizce yazılar normal:** başta tarih-saatli bir `INFO` satırı çıkabilir. Fare komutları ayrıca
-  `[EXPERIMENTAL]` ile başlayan sarı bir uyarı yazar: özelliklerin deneysel olduğunu ve ayarların fareye
-  kaydedilmediğini söyler (hatırladığın "kaydedilmiyor" notu bu olabilir).
+  `[EXPERIMENTAL]` ile başlayan sarı bir uyarı yazar: özelliklerin deneysel olduğunu, ssgg'nin "kaydet" komutu
+  göndermediğini, ama bu farenin DPI'yı çıkarıp takınca da sakladığını söyler.
 - **Hata çıkarsa:** `Error` ya da `error` ile başlayan bir yazı çıkarsa yazının tamamını kopyala; aynı komutu `sudo`
   ile deneme. 1. ya da 2. adımda (isteğe bağlı 2b hariç) hata çıkarsa dur ve bana yaz. Sonraki adımlarda hatayı
   not alıp devam edebilirsin.
@@ -58,8 +60,8 @@ Her adımda şu başlıklar var:
 ## Yapma
 
 - ssgg komutlarının başına `sudo` yazma, hata alsan da. `sudo` yalnızca 1. adımdaki iki komutta var.
-- İndirilenler klasöründeki `ssgg-linux-x86_64` dosyasını kullanma; onda bilinen bir DPI hatası var. Yalnızca
-  `./target/release/ssgg` kullan.
+- İndirilenler klasöründeki `ssgg-linux-x86_64` dosyasını kullanma; onda bilinen bir DPI hatası var, `--yes`'i de
+  tanımaz. Yalnızca `./target/release/ssgg` kullan.
 - Rehberde olmayan bir komut ya da değer deneme. Özellikle:
   - `ssgg pollrate mouse`: farenin değil, bilgisayarın bir ayarını değiştirir ve yönetici izni ister. Bizim
     komutumuz `mouse poll-rate`.
@@ -240,12 +242,17 @@ timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 Yalnızca aşağıdaki değerleri kullan; 200 ya da 8500 gibi uç değerleri deneme. Her komuttan sonra fareyi biraz
 oynat ve imlecin hızını hisset.
 
+Her DPI komutu `--yes` ile bitiyor: fare DPI'yı saklıyor ve önceki kademeleri geri okunamıyor; `--yes` bunu
+onayladığın anlamına gelir. `--yes`'i unutursan ssgg fareye hiçbir şey göndermez ve içinde
+`Nothing was sent; pass --yes to send it` geçen bir hata yazar; komutu `--yes` ile yeniden yaz.
+`unexpected argument '--yes'` diye bir hata çıkarsa `./target/release/ssgg` eski kalmış: dur ve bana yaz.
+
 ### 5a. 400
 
 **Yaz:**
 
 ```bash
-./target/release/ssgg mouse dpi 400
+./target/release/ssgg mouse dpi 400 --yes
 ```
 
 **Beklenen:** `DPI request sent (400).` ve `Echo from the mouse` satırı; imlecin belirgin şekilde yavaşlaması.
@@ -257,7 +264,7 @@ oynat ve imlecin hızını hisset.
 **Yaz:**
 
 ```bash
-./target/release/ssgg mouse dpi 3200
+./target/release/ssgg mouse dpi 3200 --yes
 ```
 
 **Beklenen:** İmlecin belirgin şekilde hızlanması (400'e göre çok daha hızlı).
@@ -269,7 +276,7 @@ oynat ve imlecin hızını hisset.
 **Yaz:**
 
 ```bash
-./target/release/ssgg mouse dpi 800 1600
+./target/release/ssgg mouse dpi 800 1600 --yes
 ```
 
 **Yap:** DPI düğmesine birkaç kez bas; her basıştan sonra fareyi biraz oynat.
@@ -284,7 +291,7 @@ etkin olması; düğmeye her basışta hızın iki kademe arasında gidip gelmes
 **Yaz:**
 
 ```bash
-./target/release/ssgg mouse dpi 400 800 1600 3200 --active 2
+./target/release/ssgg mouse dpi 400 800 1600 3200 --active 2 --yes
 ```
 
 **Yap:** DPI düğmesine birkaç kez bas; her basıştan sonra fareyi biraz oynat.
@@ -398,7 +405,7 @@ başlatıyoruz) ve hangi ayarın kaldığına bakıyoruz.
 ```
 
 ```bash
-./target/release/ssgg mouse dpi 400
+./target/release/ssgg mouse dpi 400 --yes
 ```
 
 ```bash
@@ -413,13 +420,12 @@ Fare şimdi kırmızı, imleç yavaş olmalı.
 timeout --foreground 5 stdbuf -oL xinput test-xi2 --root | grep -c RawMotion
 ```
 
-**Beklenen:** Farenin kendi ayarlarına dönmesi: ışığın kırmızı değil, farenin takılınca gösterdiği kendi ışığı
-olması; imlecin normal hızında olması; sayının başlangıç sayına yakın çıkması.
+**Beklenen:** Işığın kırmızı değil, farenin takılınca gösterdiği kendi ışığı olması; sayının başlangıç sayına
+yakın çıkması. İmlecin yavaş kalması: fare DPI'yı saklıyor (ilk testinde de böyle oldu).
 
 **Not al:** Işık ne renk? İmleç yavaş mı, normal mi? Sayı.
 
-Ayarlar kaldıysa (ışık hâlâ kırmızı ya da imleç hâlâ yavaşsa) bu da bir sonuç: not al, 7b ve 7c'yi yapma, bana
-yaz.
+Işık hâlâ kırmızıysa ya da sayı hâlâ düşükse bu da bir sonuç: not al, 7b ve 7c'yi yapma, bana yaz.
 
 ### 7b. (İsteğe bağlı) Askıya al
 
@@ -436,7 +442,7 @@ güç düğmesini bilgisayar kapanana kadar basılı tut, sonra yeniden aç ve b
 ```
 
 ```bash
-./target/release/ssgg mouse dpi 400
+./target/release/ssgg mouse dpi 400 --yes
 ```
 
 ```bash
@@ -470,7 +476,7 @@ oturumu ve terminal kapanabilir.
 ```
 
 ```bash
-./target/release/ssgg mouse dpi 400
+./target/release/ssgg mouse dpi 400 --yes
 ```
 
 ```bash
@@ -493,7 +499,9 @@ Ayarlar kaldıysa fareyi çıkar, 5 saniye bekle, geri tak.
 
 ## Bir şey ters giderse
 
-1. Fareyi çıkar, 5 saniye bekle, geri tak. Bu, testteki bütün ayarları geri almalı.
+1. Fareyi çıkar, 5 saniye bekle, geri tak. Bu, renk ve rapor hızını geri alır. DPI kalır: imleç yavaş ya da
+   hızlı geliyorsa 5d'deki komutu yeniden yaz (dört kademe, 800'den başlar). Yeni bir terminaldeysen önce
+   `cd ~/repolar/steelseriesgg-rs` yaz.
 2. Hâlâ bir şey değişik kaldıysa (ışık, imleç hızı, tuşlar): **dur**. Başka bir program ya da komut deneme. Bana
    yaz: hangi adımdaydın, ne yazdın, ne gördün.
 
@@ -532,3 +540,6 @@ Başka gözlemler:
 ```
 
 İzin kuralı test bitince yerinde kalabilir; uygulama da aynı kuralı kullanacak. Kaldırmak istersen bana yaz.
+
+Test bitince imleç 400 DPI'da yavaş kalır. Dört kademeye dönmek için 5d'deki komutu yeniden yaz. 7c'den sonra
+yeni bir terminaldeysen önce `cd ~/repolar/steelseriesgg-rs` yaz.
