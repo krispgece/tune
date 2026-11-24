@@ -1,4 +1,4 @@
-# The owner's PC has no AVX2: build for the baseline x86-64 CPU. A RUSTFLAGS environment variable replaces this
-# setting, so keep `-Ctarget-cpu=x86-64` in it when you set one.
+# Build for the baseline x86-64 CPU, so the app also runs on processors without AVX2. A RUSTFLAGS environment
+# variable replaces this setting, so keep `-Ctarget-cpu=x86-64` in it when you set one.
 [build]
 rustflags = ["-Ctarget-cpu=x86-64"]

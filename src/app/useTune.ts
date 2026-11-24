@@ -376,7 +376,7 @@ export function useTune(backend: Backend) {
     update((s) => withDevice(s, usbId, { ...deviceSettings(s, usbId), managed: allManaged(false) }));
   };
 
-  // The mock's scenarios, mirrored in the interface's own state the way the approved mockup does it
+  // The mock's scenarios, mirrored in the interface's own state
   const applyScenario = async (scenario: Scenario) => {
     await backend.setMockScenario(scenario);
     cancelSends();

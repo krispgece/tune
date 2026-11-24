@@ -11,8 +11,9 @@ publish.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-# The device library, from the sibling checkout (branch rival3-gen2/phase0). Only `adapter.rs` uses it.
-steelseries-gg-linux = { path = "../../../steelseriesgg-rs" }
+# The device library (ssgg), pinned to a commit of the fork that adds the mouse features Tune needs, until they are in
+# an upstream release. Only `adapter.rs` uses it.
+steelseries-gg-linux = { git = "https://github.com/krispgece/steelseriesgg-rs", rev = "85f213ea411813c48ef789be1ad3338f190b339b" }
 
 [target.'cfg(unix)'.dependencies]
 rustix = { version = "1.1.6", features = ["fs", "time"] }

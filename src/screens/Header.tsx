@@ -43,7 +43,7 @@ const SCENARIO_NAMES: Record<Scenario, StringKey> = {
   guard: 'scGuard',
 };
 
-/** Only with the mock backend: picks one of the approved mockup's situations. */
+/** Only with the mock backend: picks one of the situations the app handles. */
 export function MockBar({ tune }: { tune: Tune }) {
   const { t } = tune.i18n;
   if (!tune.isMock) return null;

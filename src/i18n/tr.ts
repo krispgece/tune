@@ -39,7 +39,7 @@ export const tr: Strings = {
 
   // Banners
   previewBanner:
-    'Bu deneme sürümü ayarlarını bu bilgisayarda saklar ama henüz fareye göndermez. Gönderme, donanım testinden sonra açılacak.',
+    'Bu sürüm ayarlarını bu bilgisayarda saklar ama fareye göndermez.',
   ownBanner: 'Farenin kendi ayarları kullanılıyor. Bir ayarı değiştirdiğinde {app} onu yönetmeye başlar.',
   guardBanner:
     'Otomatik uygulama durduruldu: fare kısa sürede iki kez bağlantıyı kopardı. Güvenlik için ayarlar yeniden gönderilmiyor.',
@@ -67,7 +67,7 @@ export const tr: Strings = {
   hFailed: '{app} fareye ulaşamadı; bir sonraki açılışında ve çalışırken fare her takıldığında yeniden dener.',
   hOwn: '{app} bu ayarı yönetmiyor; farenin kendi değeri geçerli.',
   hPaused: 'koruma devrede, ayar gönderilmiyor.',
-  hNotSent: 'bu sürümde gönderme, donanım testi doğrulayana kadar kapalı; seçimin bu bilgisayarda saklanır.',
+  hNotSent: 'bu sürüm ayar göndermez; seçimin bu bilgisayarda saklanır.',
   whatMeans: 'Bu ne demek?',
 
   // DPI
@@ -235,7 +235,7 @@ export const tr: Strings = {
   legal4: '{app}, cihaz ayarlarını üreticinin yazılımı ve desteği olmadan değiştirir. Kullanım sorumluluğu kullanıcıya aittir.',
   licenseTitle: 'Lisans',
   appLicense:
-    "{app} özgür yazılımdır: GNU Genel Kamu Lisansı'nın (GPL) 3. sürümü ya da daha sonraki herhangi bir sürümü altında paylaşabilir ve değiştirebilirsin. Hiçbir garanti verilmez. Değiştirilmiş bir sürümünü ya da kodunu içeren bir programı paylaşan, onu da aynı lisansla ve kaynak koduyla paylaşmak zorundadır.",
+    "Telif hakkı (C) 2026 {app}'a katkıda bulunanlar. {app} özgür yazılımdır: GNU Genel Kamu Lisansı'nın (GPL) 3. sürümü ya da daha sonraki herhangi bir sürümü altında paylaşabilir ve değiştirebilirsin. Hiçbir garanti verilmez. Değiştirilmiş bir sürümünü ya da kodunu içeren bir programı paylaşan, onu da aynı lisansla ve kaynak koduyla paylaşmak zorundadır. Lisansın tam metni: gnu.org/licenses/gpl-3.0.html.",
   creditsTitle: 'Teşekkür',
   credits:
     '{app} cihazlarla steelseriesgg-rs (ssgg) kütüphanesi üzerinden konuşur. Kütüphaneyi Ven0m0 geliştiriyor, ScepticDope başlattı; MIT Lisansı ile kullanılıyor (Copyright (c) 2024 ScepticDope): github.com/Ven0m0/steelseriesgg-rs. Teşekkürler.',

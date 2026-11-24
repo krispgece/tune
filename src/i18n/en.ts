@@ -37,7 +37,7 @@ export const en = {
 
   // Banners
   previewBanner:
-    "This preview keeps your settings on this computer but doesn't send them to the mouse yet. Sending is turned on after the hardware test.",
+    "This version keeps your settings on this computer but doesn't send them to the mouse.",
   ownBanner: "{app} is using the mouse's own settings. It starts managing a setting when you change it.",
   guardBanner:
     'Automatic apply stopped: the mouse disconnected twice in a short time. For safety, settings are not being sent again.',
@@ -65,7 +65,7 @@ export const en = {
   hFailed: "{app} couldn't reach the mouse. It tries again the next time it starts and, while it runs, each time the mouse is plugged in.",
   hOwn: "{app} isn't managing this setting; the mouse's own value applies.",
   hPaused: 'protection is on; nothing is being sent.',
-  hNotSent: 'sending is off in this version until the hardware test confirms it; your choice is kept on this computer.',
+  hNotSent: "this version doesn't send settings; your choice is kept on this computer.",
   whatMeans: 'What does this mean?',
 
   // DPI
@@ -232,7 +232,7 @@ export const en = {
   legal4: "{app} changes device settings without the manufacturer's software or support. Use it at your own risk.",
   licenseTitle: 'License',
   appLicense:
-    '{app} is free software: you can share and change it under the GNU General Public License (GPL), version 3 or any later version. It comes with no warranty. Whoever shares a changed version, or a program that includes its code, has to share it under the same license, with its source code.',
+    'Copyright (C) 2026 the {app} contributors. {app} is free software: you can share and change it under the GNU General Public License (GPL), version 3 or any later version. It comes with no warranty. Whoever shares a changed version, or a program that includes its code, has to share it under the same license, with its source code. Full license text: gnu.org/licenses/gpl-3.0.html.',
   creditsTitle: 'Credits',
   credits:
     '{app} talks to devices through steelseriesgg-rs (ssgg), developed by Ven0m0 and started by ScepticDope, used under the MIT License (Copyright (c) 2024 ScepticDope): github.com/Ven0m0/steelseriesgg-rs. Thank you.',

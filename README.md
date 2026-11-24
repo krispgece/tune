@@ -1,17 +1,17 @@
 # Tune
 
 Tune (working name) is a desktop app for configuring SteelSeries devices on Linux: DPI stages, polling rate and
-lighting. Tune is only a graphical frontend. The [ssgg](https://github.com/Ven0m0/steelseriesgg-rs) library
+lighting. It is an early version: so far it supports one mouse, the wired Rival 3 Gen 2, and runs on Linux only. Tune
+is only a graphical frontend. The [ssgg](https://github.com/Ven0m0/steelseriesgg-rs) library
 (`steelseries_gg`) talks to the devices, so the devices Tune can detect depend on ssgg.
 
 Unofficial. Not affiliated with or endorsed by SteelSeries; see the [legal notice](#legal-notice) below.
 
 ## Status
 
-Phase 1: the app's screens are built and also run on fake devices. With a wired Rival 3 Gen 2 the app sends DPI
-stages, the polling rate and the lighting (one colour, by zone or off), and shows what the mouse answered. These were
-tried on one mouse, first by hand in the Phase 0 hardware test and then from the app in the Phase 1 try-out
-(2026-11-23, `docs/`). Sending again after the computer wakes from sleep was not tried on the mouse.
+The app's screens also run on fake devices. With a wired Rival 3 Gen 2 the app sends DPI stages, the polling rate
+and the lighting (one colour, by zone or off), and shows what the mouse answered. These were tried on one mouse, first
+by hand and then from the app. Sending again after the computer wakes from sleep was not tried on the mouse.
 
 - First supported device: the wired Rival 3 Gen 2. Other SteelSeries devices that ssgg recognizes show up as "Not
   supported yet", and nothing is sent to them.
@@ -33,7 +33,9 @@ tried on one mouse, first by hand in the Phase 0 hardware test and then from the
 Requirements:
 
 - Rust (the version in `Cargo.toml`) and Node.js 18 or newer with npm.
-- The ssgg checkout next to this one, at `../steelseriesgg-rs`, on the branch `rival3-gen2/phase0`.
+- Network access on the first build: Cargo fetches the ssgg library from
+  [a fork](https://github.com/krispgece/steelseriesgg-rs) at a fixed commit, which adds the mouse features Tune needs
+  until they are in an upstream release.
 - On Debian or Ubuntu: `sudo apt install build-essential pkg-config libwebkit2gtk-4.1-dev`.
 - To run: the tray icon needs `libayatana-appindicator3-1` (Ubuntu's desktop has it; otherwise
   `sudo apt install libayatana-appindicator3-1`). Without it the app runs with no tray icon, and closing the window
@@ -67,7 +69,6 @@ Tests: `npm test` and `cargo test --locked`.
 - `src-tauri/`: the desktop shell (Tauri 2): the window, the tray icon and the commands the interface calls.
 - `crates/tune-core/`: the adapter to the ssgg library, the fake devices, the settings file, the login entry and the
   single-copy lock.
-- `docs/`: hardware test guides (in Turkish).
 - `packaging/linux/`: a udev rule that gives the user signed in at the computer access to the mouse's settings
   interface only.
 
@@ -91,6 +92,8 @@ Tune talks to devices through [steelseriesgg-rs](https://github.com/Ven0m0/steel
 Ven0m0 and started by ScepticDope, used under the MIT License (Copyright (c) 2024 ScepticDope). Thank you.
 
 ## License
+
+Copyright (C) 2026 the Tune contributors.
 
 Tune is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

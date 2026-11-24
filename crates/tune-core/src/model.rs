@@ -67,7 +67,7 @@ pub struct DeviceSummary {
     pub instance: String,
 }
 
-/// The mock backend's states. They match the states of the approved mockup.
+/// The mock backend's states: the situations the app handles.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Scenario {

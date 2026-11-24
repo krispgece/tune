@@ -5,16 +5,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 Tune (working name) is a Linux desktop app for SteelSeries devices, built on the ssgg Rust library
-(`steelseries_gg`). Phase 1 is in place: every screen of the approved mockup runs on fake devices, and with the wired
+(`steelseries_gg`). Every screen runs on fake devices, and with the wired
 Rival 3 Gen 2 the app sends DPI stages, polling rate and lighting. Installing or removing the access rule from the app
 (the system's password window) is still a stub; the app shows the terminal commands instead.
 
 - Stack: Tauri 2 + React/TypeScript (Vite). The Rust side calls the library in-process through one adapter module.
-- During development the library comes from the sibling checkout `../steelseriesgg-rs` (branch
-  `rival3-gen2/phase0`, not pushed), which also builds the `ssgg` CLI that the test guide uses.
-- Build anything from that checkout with `RUSTFLAGS=-Ctarget-cpu=x86-64` (for example
-  `RUSTFLAGS=-Ctarget-cpu=x86-64 cargo build --release --locked`). Its `.cargo/config.toml` targets x86-64-v3, and
-  the owner's PC has no AVX2, so a default build crashes there. This repository's own `.cargo/config.toml` already
+- The library comes from the fork `krispgece/steelseriesgg-rs`, pinned to a commit in `crates/tune-core/Cargo.toml`,
+  until its mouse changes are in an upstream release. To try a local ssgg change, add a temporary `[patch]` for that
+  git URL pointing at a local checkout; never commit the patch, nor `Cargo.lock` while it is on.
+- Build an ssgg checkout itself with `RUSTFLAGS=-Ctarget-cpu=x86-64` (for example
+  `RUSTFLAGS=-Ctarget-cpu=x86-64 cargo build --release --locked`). Its `.cargo/config.toml` targets x86-64-v3, which
+  crashes on CPUs without AVX2. This repository's own `.cargo/config.toml` already
   sets the baseline; a `RUSTFLAGS` variable replaces it, so keep the flag in one you set.
 - First device: the wired Rival 3 Gen 2. Colour and polling rate live on the PC and are sent again at app start and,
   while the app runs, on plug-in and after the computer wakes (the mouse forgets them). The mouse stores DPI stages and
@@ -42,7 +43,7 @@ src/                React UI: app/useTune.ts (state and actions), screens/, comp
                     i18n/ (en.ts, tr.ts), theme/ (tokens computed for light and dark), backend/ (Tauri calls and
                     an in-page mock for `npm run dev`)
 packaging/linux/    the udev rule, also bundled as an app resource
-docs/               the Phase 0 hardware test and the Phase 1 try-out guides (Turkish)
+docs/               local try-out guides (Turkish), not tracked: listed in `.git/info/exclude`
 ```
 
 ## Commands
