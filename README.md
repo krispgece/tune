@@ -36,6 +36,13 @@ by hand and then from the app. Sending again after the computer wakes from sleep
 - Features keep an "Experimental" badge until testing beyond that one mouse confirms them.
 - The interface is in English by default and also in Turkish, with light and dark themes.
 
+## Install
+
+Download the package for your system from the [latest release](https://github.com/krispgece/tune/releases/latest):
+the `.deb` for Ubuntu, Debian and Linux Mint, or the `.rpm` for Fedora (not tested yet). The release notes show how
+to check the download and install it. The package also sets up the mouse permission. To build Tune yourself, see
+below.
+
 ## Build and run
 
 Requirements:
