@@ -16,6 +16,12 @@ pub fn installed_rule() -> Option<PathBuf> {
     find_rule(RULE_DIRS.iter().map(Path::new))
 }
 
+/// The copy of the access rule that Tune's package installs into the system's own rules folders, if any. A copy in
+/// `/etc` hides it, so `installed_rule` names that one.
+pub fn package_rule() -> Option<PathBuf> {
+    find_rule(RULE_DIRS[1..].iter().map(Path::new))
+}
+
 pub fn find_rule<'a>(dirs: impl IntoIterator<Item = &'a Path>) -> Option<PathBuf> {
     dirs.into_iter()
         .map(|dir| dir.join(RULE_FILE_NAME))

@@ -31,7 +31,7 @@ fn copy_name(mock: bool) -> &'static str {
 }
 
 /// The access rule among the app's resources; `bundle.resources` in `tauri.conf.json` puts it there.
-const BUNDLED_RULE: &str = "udev/70-tune-rival3-gen2.rules";
+const BUNDLED_RULE: &str = "70-tune-rival3-gen2.rules";
 /// Next to the settings file while sending is paused for safety, so the pause holds across restarts.
 const PAUSE_FILE: &str = "reapply-paused";
 const MAIN_WINDOW: &str = "main";

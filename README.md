@@ -36,7 +36,8 @@ Requirements:
 - Network access on the first build: Cargo fetches the ssgg library from
   [a fork](https://github.com/krispgece/steelseriesgg-rs) at a fixed commit, which adds the mouse features Tune needs
   until they are in an upstream release.
-- On Debian or Ubuntu: `sudo apt install build-essential pkg-config libwebkit2gtk-4.1-dev`.
+- On Debian or Ubuntu: `sudo apt install build-essential pkg-config libwebkit2gtk-4.1-dev`. Building the install
+  packages also needs `libayatana-appindicator3-dev`.
 - To run: the tray icon needs `libayatana-appindicator3-1` (Ubuntu's desktop has it; otherwise
   `sudo apt install libayatana-appindicator3-1`). Without it the app runs with no tray icon, and closing the window
   quits it. On GNOME the icon shows only with the AppIndicator extension, which Ubuntu turns on.
@@ -49,6 +50,7 @@ npm install
 npm run app:mock     # the app with fake devices; real hardware is not touched
 npm run app          # the app with the plugged-in devices; it sends settings to the Rival 3 Gen 2
 npm run app:release  # release build, written to target/release/tune
+npm run package      # .deb and .rpm packages, written to target/release/bundle/
 npm run dev          # the interface alone in a browser (http://localhost:1420), with built-in fake devices
 ```
 
@@ -61,6 +63,12 @@ With fake devices, a bar at the top switches between the situations the app hand
 mouse unplugged, no permission, and so on). The app keeps its settings in `~/.config/io.github.krispgece.tune/`; the
 fake devices keep theirs in memory only.
 
+The packages install the program as `/usr/bin/tune` with a menu entry, and the udev rule as
+`/usr/lib/udev/rules.d/70-tune-rival3-gen2.rules`; installing a package gives the permission to a mouse that is
+already plugged in, and after removal the mouse keeps it until it is unplugged. Install with
+`sudo apt install ./target/release/bundle/deb/Tune_0.1.0_amd64.deb` (or `sudo dnf install` with the .rpm). If you
+copied the rule to `/etc/udev/rules.d/` by hand before, delete that copy: it hides the package's rule.
+
 Tests: `npm test` and `cargo test --locked`. After changing dependencies, run `npm run notices` to update
 `THIRD-PARTY-NOTICES.txt`; `npm run notices:check` fails while it is out of date.
 
@@ -71,6 +79,7 @@ Tests: `npm test` and `cargo test --locked`. After changing dependencies, run `n
 - `crates/tune-core/`: the adapter to the ssgg library, the fake devices, the settings file, the login entry and the
   single-copy lock.
 - `scripts/third-party-notices.mjs`: writes `THIRD-PARTY-NOTICES.txt` (`npm run notices`).
+- `scripts/package.sh`: builds the .deb and .rpm (`npm run package`).
 - `packaging/linux/`: a udev rule that gives the user signed in at the computer access to the mouse's settings
   interface only.
 

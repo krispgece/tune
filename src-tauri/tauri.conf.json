@@ -17,6 +17,11 @@
   },
   "bundle": {
     "active": false,
+    "targets": ["deb", "rpm"],
+    "shortDescription": "Set DPI, polling rate and colour on a SteelSeries Rival 3 Gen 2",
+    "longDescription": "Tune is an unofficial Linux desktop app that sets the DPI stages, polling rate and colours of a SteelSeries Rival 3 Gen 2 mouse. It is not made or endorsed by SteelSeries. The package also installs a udev rule that lets the user signed in at the computer reach the mouse's settings interface.",
+    "category": "Utility",
+    "homepage": "https://github.com/krispgece/tune",
     "license": "GPL-3.0-or-later",
     "licenseFile": "../LICENSE",
     "copyright": "Copyright (C) 2026 the Tune contributors",
@@ -24,13 +29,29 @@
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
-      "icons/128x128@2x.png",
       "icons/icon.png"
     ],
     "resources": {
-      "../packaging/linux/70-tune-rival3-gen2.rules": "udev/70-tune-rival3-gen2.rules",
+      "../packaging/linux/70-tune-rival3-gen2.rules": "70-tune-rival3-gen2.rules",
       "../LICENSE": "LICENSE",
       "../THIRD-PARTY-NOTICES.txt": "THIRD-PARTY-NOTICES.txt"
+    },
+    "linux": {
+      "deb": {
+        "section": "utils",
+        "files": {
+          "/usr/lib/udev/rules.d/70-tune-rival3-gen2.rules": "../packaging/linux/70-tune-rival3-gen2.rules"
+        },
+        "postInstallScript": "../packaging/linux/reload-udev.sh",
+        "postRemoveScript": "../packaging/linux/reload-udev.sh"
+      },
+      "rpm": {
+        "files": {
+          "/usr/lib/udev/rules.d/70-tune-rival3-gen2.rules": "../packaging/linux/70-tune-rival3-gen2.rules"
+        },
+        "postInstallScript": "../packaging/linux/reload-udev.sh",
+        "postRemoveScript": "../packaging/linux/reload-udev.sh"
+      }
     }
   }
 }

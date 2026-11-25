@@ -37,6 +37,8 @@ export interface ScanReport {
   devices: DeviceSummary[];
   /** Where the access rule is installed, when it is. */
   accessRule: string | null;
+  /** Whether Tune's package installed the rule; a copy in /etc may hide it from `accessRule`. */
+  accessRuleFromPackage: boolean;
   /** Re-applying stopped after the mouse dropped off twice in a short time. */
   reapplyPaused: boolean;
   /** How many times the computer woke from sleep while the app ran; the mouse may have lost its settings in between. */

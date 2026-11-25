@@ -23,6 +23,11 @@ export function applyCommands(): string[] {
   return [TRIGGER];
 }
 
+/** A rule in the system's own rules folder came with Tune's package, which removes it on uninstall. */
+export function ruleFromPackage(installedPath: string | null): boolean {
+  return installedPath !== null && /^\/(usr\/)?lib\/udev\/rules\.d\//.test(installedPath);
+}
+
 /** Removing the rule does not take the permission from a mouse that is plugged in; that waits for a replug. */
 export function removeCommands(installedPath: string | null, fileName: string): string[] {
   return [`sudo rm ${shellQuote(installedPath ?? `${RULE_DIR}/${fileName}`)}`, RELOAD];

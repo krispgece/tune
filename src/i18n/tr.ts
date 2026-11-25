@@ -204,6 +204,10 @@ export const tr: Strings = {
   allowLater: 'İzni buradan kurmak sonraki bir sürümde gelecek. Şimdilik terminal komutlarını kullan.',
   removeLater:
     'İzni buradan kaldırmak sonraki bir sürümde gelecek. Şimdi kaldırmak için bu komutları terminalde çalıştır. Fare, çıkarılıp yeniden takılana kadar izni korur.',
+  removePkg:
+    "Bu izin {app} paketiyle geldi; {app}'u kaldırınca izin de kalkar. Fare, çıkarılıp yeniden takılana kadar izni korur.",
+  removeCopy:
+    'Elle kurduğun bir kopya da var. Paketin ona ihtiyacı yok; silmek için bu komutları terminalde çalıştır.',
   startupTitle: 'Başlangıç',
   startAtLogin: 'Oturum açılınca başlat',
   switchOff: 'Kapalı',
@@ -252,7 +256,7 @@ export const tr: Strings = {
   unplText: "Rival 3 Gen 2'yi bir USB girişine tak. {app} bunu hemen fark eder ve ayarlarını uygular.",
   npTitle: '{app} fareye henüz ulaşamıyor',
   npText:
-    'Ayarları değiştirmek için bir kerelik izin gerekiyor. Şifreni sistem kendi penceresinde sorar; {app} şifreni görmez.',
+    'Ayarları değiştirmek için bir kerelik izin gerekiyor. Şifreni yalnızca sistem kendisi sorduğunda yazarsın; {app} şifreni görmez.',
   waiting: 'Sistemin şifre penceresi bekleniyor…',
   manual: 'Terminalde kendim yapacağım',
   manualText: 'Bu komutları çalıştır. Sonuncusu izni şu an takılı olan fareye de uygular.',
@@ -293,7 +297,7 @@ export const tr: Strings = {
   perm2: 'Farenin imleç ve tuş kanallarına dokunmaz.',
   perm3: 'Yalnızca bu bilgisayarda oturum açmış kullanıcıya açılır; diğer kullanıcılara açılmaz.',
   perm4: "İstediğin zaman Ayarlar'dan kaldırabilirsin.",
-  pwNote: 'Şifreni sistem kendi penceresinde sorar; {app} şifreni görmez.',
+  pwNote: 'Şifreni yalnızca sistem kendisi sorduğunda yazarsın; {app} şifreni görmez.',
   notNow: 'Şimdi değil',
   pkgNote: "{app}'u bir paketle kurduysan bu izin kurulumla gelir ve bu adım atlanır.",
   readyTitle: 'Hazırsın',

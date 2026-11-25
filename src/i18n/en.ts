@@ -201,6 +201,10 @@ export const en = {
   allowLater: 'Installing the permission from here comes in a later version. For now, use the terminal commands.',
   removeLater:
     'Removing the permission from here comes in a later version. To remove it now, run these commands in a terminal. The mouse keeps the permission until you unplug it.',
+  removePkg:
+    "This permission came with {app}'s package, and uninstalling {app} removes it. The mouse keeps the permission until you unplug it.",
+  removeCopy:
+    'A copy you installed by hand is also there. The package does not need it; to delete it, run these commands in a terminal.',
   startupTitle: 'Start-up',
   startAtLogin: 'Start at login',
   switchOff: 'Off',
@@ -249,7 +253,7 @@ export const en = {
   unplText: 'Plug the Rival 3 Gen 2 into a USB port. {app} notices it right away and applies your settings.',
   npTitle: "{app} can't reach your mouse yet",
   npText:
-    'Changing settings needs a one-time permission. Your system asks for your password in its own window; {app} never sees it.',
+    "Changing settings needs a one-time permission. You type your password only in your system's own prompts; {app} never sees it.",
   waiting: "Waiting for your system's password window…",
   manual: "I'll do it myself in a terminal",
   manualText: 'Run these commands. The last one also applies the permission to a mouse that is already plugged in.',
@@ -290,7 +294,7 @@ export const en = {
   perm2: "Leaves your mouse's pointer and button channels as they are.",
   perm3: 'Only the user signed in at this computer gets it; other users do not.',
   perm4: 'You can remove it any time in Settings.',
-  pwNote: 'Your system asks for your password in its own window. {app} never sees it.',
+  pwNote: "You type your password only in your system's own prompts. {app} never sees it.",
   notNow: 'Not now',
   pkgNote: 'Installed {app} from a package? The package sets this up, and this step is skipped.',
   readyTitle: "You're all set",

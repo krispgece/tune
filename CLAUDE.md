@@ -44,7 +44,8 @@ src-tauri/          the window, the tray and the commands the interface calls; p
 src/                React UI: app/useTune.ts (state and actions), screens/, components/, state/ (pure logic),
                     i18n/ (en.ts, tr.ts), theme/ (tokens computed for light and dark), backend/ (Tauri calls and
                     an in-page mock for `npm run dev`)
-packaging/linux/    the udev rule, also bundled as an app resource
+packaging/linux/    the udev rule (an app resource, and installed by the deb and rpm to /usr/lib/udev/rules.d) and
+                    reload-udev.sh (the packages' post-install and post-remove script)
 docs/               local try-out guides (Turkish), not tracked: listed in `.git/info/exclude`
 ```
 
@@ -56,11 +57,13 @@ docs/               local try-out guides (Turkish), not tracked: listed in `.git
 | App, real devices (sends to the mouse: the owner runs it) | `npm run app` |
 | Interface in a browser, in-page fake devices | `npm run dev` (port 1420) |
 | Release binary | `npm run app:release` (`target/release/tune`) |
+| Packages | `npm run package` (deb and rpm in `target/release/bundle/`; `bundle.active` stays false, so `app:release` builds no package) |
 | Tests | `npm test`, `cargo test --locked` |
 | Checks | `npm run check`, `npm run notices:check`, `cargo fmt --all -- --check`, `cargo clippy --all-targets --locked -- -D warnings` |
 | Third-party notices | `npm run notices` (after any dependency change; writes `THIRD-PARTY-NOTICES.txt`) |
 
-Building `src-tauri` needs `libwebkit2gtk-4.1-dev` (it pulls in GTK 3 and libsoup 3). The in-page mock
+Building `src-tauri` needs `libwebkit2gtk-4.1-dev` (it pulls in GTK 3 and libsoup 3); building the packages also
+needs `libayatana-appindicator3-dev`, or the Tauri CLI stops. The in-page mock
 (`src/backend/browserMock.ts`) mirrors `crates/tune-core/src/mock.rs`; change both together.
 
 ## Renaming

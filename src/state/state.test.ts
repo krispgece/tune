@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { AppInfo, DeviceSummary, ScanReport, Settings } from '../backend/types';
 import { translator } from '../i18n';
-import { applyCommands, installCommands, removeCommands, shellQuote } from './commands';
+import { applyCommands, installCommands, removeCommands, ruleFromPackage, shellQuote } from './commands';
 import {
   applyStatus,
   comebacks,
@@ -42,6 +42,7 @@ const keyboard: DeviceSummary = { ...rival, id: '1038:1628', usbId: '1038:1628',
 const report = (devices: DeviceSummary[], accessRule: string | null = null): ScanReport => ({
   devices,
   accessRule,
+  accessRuleFromPackage: false,
   reapplyPaused: false,
   wakes: 0,
   mockScenario: null,
@@ -144,6 +145,13 @@ describe('commands', () => {
     expect(removeCommands('/usr/lib/udev/rules.d/70-x.rules', '70-x.rules')[0]).toBe(
       'sudo rm /usr/lib/udev/rules.d/70-x.rules',
     );
+  });
+
+  it('tell a rule from the package apart from one installed by hand', () => {
+    expect(ruleFromPackage('/usr/lib/udev/rules.d/70-x.rules')).toBe(true);
+    expect(ruleFromPackage('/lib/udev/rules.d/70-x.rules')).toBe(true);
+    expect(ruleFromPackage('/etc/udev/rules.d/70-x.rules')).toBe(false);
+    expect(ruleFromPackage(null)).toBe(false);
   });
 });
 

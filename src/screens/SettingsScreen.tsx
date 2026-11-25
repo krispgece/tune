@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { Tune } from '../app/useTune';
 import { Commands } from '../components/Commands';
 import { Button, LanguagePicker, Segmented } from '../components/ui';
-import { removeCommands, RULE_FILE_NAME } from '../state/commands';
+import { removeCommands, ruleFromPackage, RULE_FILE_NAME } from '../state/commands';
 import { installLines, PermMessage, ReplugHelp, Waiting } from './Access';
 
 type LicenseView = { which: 'gpl' | 'thirdParty'; text: string | null };
@@ -18,6 +18,7 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
   const [licenses, setLicenses] = useState(false);
   const [licenseView, setLicenseView] = useState<LicenseView | null>(null);
   const installedRule = tune.scan?.accessRule ?? null;
+  const fromPackage = tune.scan?.accessRuleFromPackage ?? false;
   const fileName = tune.rule?.fileName ?? RULE_FILE_NAME;
   const showInstall =
     !tune.accessAllowed && !tune.replug && (tune.perm === 'notAvailable' || tune.perm === 'stillDenied');
@@ -161,12 +162,18 @@ export function SettingsScreen({ tune }: { tune: Tune }) {
           )}
           {(tune.accessAllowed || tune.replug) && tune.removeHelp && (
             <div className="cell stack stack-12">
-              <p className="small-2">{t('removeLater')}</p>
-              <Commands
-                lines={removeLines}
-                copied={tune.toast === 'settings'}
-                onCopy={() => void tune.copy(removeLines.join('\n'), 'settings')}
-              />
+              {fromPackage && <p className="small-2">{t('removePkg')}</p>}
+              {/* A copy installed by hand can go; with the package's copy in place, the permission stays. */}
+              {installedRule && !ruleFromPackage(installedRule) && (
+                <>
+                  <p className="small-2">{t(fromPackage ? 'removeCopy' : 'removeLater')}</p>
+                  <Commands
+                    lines={removeLines}
+                    copied={tune.toast === 'settings'}
+                    onCopy={() => void tune.copy(removeLines.join('\n'), 'settings')}
+                  />
+                </>
+              )}
             </div>
           )}
         </div>

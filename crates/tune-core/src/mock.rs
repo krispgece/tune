@@ -117,6 +117,7 @@ impl Backend for MockBackend {
         Ok(ScanReport {
             devices,
             access_rule: state.rule.then(|| format!("{}/{RULE_FILE_NAME}", RULE_DIRS[0])),
+            access_rule_from_package: false,
             reapply_paused: state.paused,
             wakes: 0,
             mock_scenario: Some(state.scenario),

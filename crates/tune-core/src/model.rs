@@ -96,6 +96,8 @@ pub struct ScanReport {
     pub devices: Vec<DeviceSummary>,
     /// Where the access rule is installed, if it is.
     pub access_rule: Option<String>,
+    /// Whether Tune's package installed the rule; a copy in `/etc` may hide it from `access_rule`.
+    pub access_rule_from_package: bool,
     /// Re-applying settings is paused for safety.
     pub reapply_paused: bool,
     /// How many times the computer woke from sleep while the app ran. The mouse may have lost its settings in between.

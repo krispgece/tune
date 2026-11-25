@@ -15,7 +15,7 @@ use steelseries_gg::devices::mice::{Mouse, PollRateReadback, SettingAck};
 use steelseries_gg::devices::{DeviceInfo, DeviceManager, DeviceType, product_ids};
 use steelseries_gg::rgb::Color;
 
-use crate::access::{installed_rule, node_access, node_instance};
+use crate::access::{installed_rule, node_access, node_instance, package_rule};
 use crate::backend::{Backend, BackendKind};
 use crate::model::{
     ActionOutcome, ApplyOutcome, Connection, DeviceAccess, DeviceKind, DevicePage, DeviceSummary, MouseCaps,
@@ -131,6 +131,7 @@ impl Backend for SsggBackend {
         Ok(ScanReport {
             devices,
             access_rule: installed_rule().map(|path| path.to_string_lossy().into_owned()),
+            access_rule_from_package: package_rule().is_some(),
             reapply_paused,
             wakes,
             mock_scenario: None,
