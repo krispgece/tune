@@ -1,11 +1,19 @@
 # Tune
 
-Tune (working name) is a desktop app for configuring SteelSeries devices on Linux: DPI stages, polling rate and
-lighting. It is an early version: so far it supports one mouse, the wired Rival 3 Gen 2, and runs on Linux only. Tune
-is only a graphical frontend. The [ssgg](https://github.com/Ven0m0/steelseriesgg-rs) library
+Tune ([working name](#about-the-name)) is a desktop app for configuring SteelSeries devices on Linux: DPI stages,
+polling rate and lighting. It is an early version: so far it supports one mouse, the wired Rival 3 Gen 2, and runs on
+Linux only. Tune is only a graphical frontend. The [ssgg](https://github.com/Ven0m0/steelseriesgg-rs) library
 (`steelseries_gg`) talks to the devices, so the devices Tune can detect depend on ssgg.
 
 Unofficial. Not affiliated with or endorsed by SteelSeries; see the [legal notice](#legal-notice) below.
+
+## About the name
+
+"Tune" is a working name, made up on the spot. If you object to it, for example because the name is yours or is
+already in use for something else, please [open an issue](https://github.com/krispgece/tune/issues) and say why.
+Every request is considered, and it can lead to a new name. Name suggestions are taken only from people who have
+already contributed to the project, for example with a merged pull request; please link your contribution in the
+issue.
 
 ## Status
 
